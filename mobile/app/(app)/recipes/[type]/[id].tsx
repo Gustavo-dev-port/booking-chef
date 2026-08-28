@@ -3,6 +3,7 @@ import { Alert, Image, Pressable, ScrollView, Text, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { BackButton } from '../../../../src/components/BackButton';
 import { FormField } from '../../../../src/components/FormField';
 import { PrimaryButton } from '../../../../src/components/PrimaryButton';
 import {
@@ -142,6 +143,7 @@ export default function RecipeEditorScreen() {
 
   return (
     <ScrollView className="flex-1 bg-white" contentContainerClassName="px-6 py-16">
+      <BackButton />
       <Text className="mb-6 text-2xl font-bold text-gray-900">
         {isNew ? 'Nova ficha' : 'Editar ficha'}
       </Text>

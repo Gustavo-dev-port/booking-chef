@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { FlatList, Pressable, RefreshControl, Text, TextInput, View } from 'react-native';
 import { Link, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { BackButton } from '../../../../src/components/BackButton';
 import { RecipeCard } from '../../../../src/components/RecipeCard';
 import { PrimaryButton } from '../../../../src/components/PrimaryButton';
 import { listRecipes, type RecipeSummary } from '../../../../src/features/recipes/api';
@@ -69,6 +70,7 @@ export default function RecipeListScreen() {
   return (
     <View className="flex-1 bg-gray-50 pt-16">
       <View className="px-4">
+        <BackButton />
         <Text className="mb-4 text-2xl font-bold text-gray-900">{RECIPE_TYPE_LABELS[type]}</Text>
 
         <TextInput

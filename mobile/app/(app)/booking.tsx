@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
+import { BackButton } from '../../src/components/BackButton';
 import { PrimaryButton } from '../../src/components/PrimaryButton';
 import { useAuthStore } from '../../src/features/auth/store';
 import { getCompanyName, listRecipesForBooking, type BookingRecipe } from '../../src/features/booking/api';
@@ -100,6 +101,7 @@ export default function BookingScreen() {
 
   return (
     <ScrollView className="flex-1 bg-white" contentContainerClassName="flex-grow justify-center px-6 py-12">
+      <BackButton />
       <Text className="mb-1 text-2xl font-bold text-gray-900">Gerar Booking</Text>
       <Text className="mb-8 text-base text-gray-500">
         Um PDF com capa, sumário e uma ficha por página — pronto pra imprimir.

@@ -43,7 +43,7 @@ export function FormField<T extends FieldValues>({
               value={value === undefined || value === null ? '' : String(value)}
               secureTextEntry={showPasswordToggle ? !revealed : secureTextEntry}
               className={
-                'min-h-[44px] rounded-xl border px-4 text-base ' +
+                'min-h-[44px] rounded-xl border px-4 text-base text-gray-900 ' +
                 (showPasswordToggle ? 'pr-20 ' : '') +
                 (error ? 'border-red-500' : 'border-gray-300')
               }

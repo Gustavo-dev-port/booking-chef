@@ -1,5 +1,6 @@
 import { ScrollView, Text, View } from 'react-native';
 import { router } from 'expo-router';
+import { BackButton } from '../src/components/BackButton';
 import { PrimaryButton } from '../src/components/PrimaryButton';
 
 /**
@@ -14,6 +15,7 @@ import { PrimaryButton } from '../src/components/PrimaryButton';
 export default function TermsScreen() {
   return (
     <ScrollView className="flex-1 bg-white" contentContainerClassName="px-6 py-16">
+      <BackButton />
       <Text className="mb-1 text-2xl font-bold text-gray-900">Termos de Uso</Text>
       <View className="mb-6 rounded-xl bg-amber-50 px-4 py-3">
         <Text className="text-sm text-amber-800">

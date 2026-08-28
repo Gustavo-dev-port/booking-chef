@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ScrollView, Text } from 'react-native';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { BackButton } from '../../src/components/BackButton';
 import { FormField } from '../../src/components/FormField';
 import { PrimaryButton } from '../../src/components/PrimaryButton';
 import { forgotPasswordSchema, type ForgotPasswordInput } from '../../src/validators/auth';
@@ -32,6 +33,7 @@ export default function ForgotPasswordScreen() {
   if (sent) {
     return (
       <ScrollView className="flex-1 bg-white" contentContainerClassName="flex-grow justify-center px-6">
+        <BackButton />
         <Text className="mb-3 text-2xl font-bold text-gray-900">Email enviado</Text>
         <Text className="text-base text-gray-500">
           Se existir uma conta com esse email, você vai receber um link para criar uma nova senha.
@@ -42,6 +44,7 @@ export default function ForgotPasswordScreen() {
 
   return (
     <ScrollView className="flex-1 bg-white" contentContainerClassName="flex-grow justify-center px-6 py-12">
+      <BackButton />
       <Text className="mb-3 text-2xl font-bold text-gray-900">Esqueci minha senha</Text>
       <Text className="mb-6 text-base text-gray-500">
         Informe o email da sua conta. Vamos enviar um link para você criar uma nova senha.

@@ -3,6 +3,7 @@ import { ScrollView, Text } from 'react-native';
 import { router } from 'expo-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { BackButton } from '../../src/components/BackButton';
 import { FormField } from '../../src/components/FormField';
 import { PrimaryButton } from '../../src/components/PrimaryButton';
 import { signupSchema, type SignupInput } from '../../src/validators/auth';
@@ -41,6 +42,7 @@ export default function SignupScreen() {
 
   return (
     <ScrollView className="flex-1 bg-white" contentContainerClassName="flex-grow justify-center px-6 py-12">
+      <BackButton />
       <Text className="mb-8 text-2xl font-bold text-gray-900">Criar conta</Text>
 
       <FormField
