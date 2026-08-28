@@ -1,0 +1,6 @@
+{
+  "name": "Estoque & Ficha Técnica",
+  "description": "Contagem rápida de estoque e fichas técnicas com cálculo de custos para bares e restaurantes.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
