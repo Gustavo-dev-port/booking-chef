@@ -56,13 +56,16 @@ export default function SignupScreen() {
         name="password"
         label="Senha"
         secureTextEntry
+        showPasswordToggle
         autoComplete="new-password"
+        hint="Mínimo de 8 caracteres"
       />
       <FormField
         control={control}
         name="confirmPassword"
         label="Confirmar senha"
         secureTextEntry
+        showPasswordToggle
         autoComplete="new-password"
       />
 

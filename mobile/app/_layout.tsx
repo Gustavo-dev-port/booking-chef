@@ -59,15 +59,15 @@ function RootNavigator() {
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      {/* Sempre registradas (fora de qualquer guard). reset-password é
-          alcançada via router.replace em handleRecoveryUrl (nunca pelo
-          anchor route); terms/privacy precisam abrir tanto de dentro do
-          onboarding quanto da tela de Perfil, então não fazem sentido
-          dentro de um grupo protegido específico. */}
-      <Stack.Screen name="reset-password" />
-      <Stack.Screen name="terms" />
-      <Stack.Screen name="privacy" />
-
+      {/* Ordem importa: um Stack nativo sem initialRouteName explícito usa
+          o PRIMEIRO screen do array final (depois de resolver os guards)
+          como tela padrão. Os 3 grupos abaixo são mutuamente exclusivos e
+          exaustivos (sempre exatamente um guard é true) — por isso ficam
+          primeiro, garantindo que o app sempre abre no grupo certo. Tinha
+          um bug real aqui: reset-password/terms/privacy estavam
+          incondicionais e ANTES dos grupos, então o app sempre abria em
+          "nova senha", pra qualquer usuário, sempre — não só durante
+          recuperação de senha de verdade. */}
       <Stack.Protected guard={!isRecovering && !session}>
         <Stack.Screen name="(auth)" />
       </Stack.Protected>
@@ -79,6 +79,21 @@ function RootNavigator() {
       <Stack.Protected guard={!isRecovering && !!session && onboardingComplete}>
         <Stack.Screen name="(app)" />
       </Stack.Protected>
+
+      {/* Só existe no array (e só pode virar tela padrão) durante um
+          fluxo de recuperação de senha de verdade — ver isRecovering em
+          src/features/auth/recovery.ts. Alcançada via router.replace em
+          handleRecoveryUrl, nunca pelo anchor route. */}
+      <Stack.Protected guard={isRecovering}>
+        <Stack.Screen name="reset-password" />
+      </Stack.Protected>
+
+      {/* terms/privacy continuam sempre montadas (linkadas do onboarding
+          e do Perfil), mas listadas por último — como os 3 grupos acima
+          sempre têm exatamente um ativo em primeiro lugar, elas nunca
+          viram a tela padrão. */}
+      <Stack.Screen name="terms" />
+      <Stack.Screen name="privacy" />
     </Stack>
   );
 }

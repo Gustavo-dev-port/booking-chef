@@ -50,6 +50,7 @@ export default function LoginScreen() {
         name="password"
         label="Senha"
         secureTextEntry
+        showPasswordToggle
         autoComplete="current-password"
       />
 

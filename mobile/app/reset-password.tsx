@@ -59,13 +59,16 @@ export default function ResetPasswordScreen() {
         name="password"
         label="Nova senha"
         secureTextEntry
+        showPasswordToggle
         autoComplete="new-password"
+        hint="Mínimo de 8 caracteres"
       />
       <FormField
         control={control}
         name="confirmPassword"
         label="Confirmar nova senha"
         secureTextEntry
+        showPasswordToggle
         autoComplete="new-password"
       />
 
