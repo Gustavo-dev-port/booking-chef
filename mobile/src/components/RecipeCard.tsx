@@ -15,21 +15,21 @@ export function RecipeCard({ recipe, onPress }: RecipeCardProps) {
       accessibilityRole="button"
       accessibilityLabel={recipe.name}
       onPress={onPress}
-      className="mb-3 min-h-[44px] flex-row items-center gap-3 rounded-2xl border border-gray-200 bg-white p-3 active:bg-gray-50"
+      className="mb-3 min-h-[44px] flex-row items-center gap-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3 active:bg-gray-50 dark:active:bg-gray-950"
     >
       {photoUrl ? (
-        <Image source={{ uri: photoUrl }} className="h-14 w-14 rounded-xl bg-gray-100" />
+        <Image source={{ uri: photoUrl }} className="h-14 w-14 rounded-xl bg-gray-100 dark:bg-gray-800" />
       ) : (
-        <View className="h-14 w-14 items-center justify-center rounded-xl bg-gray-100">
+        <View className="h-14 w-14 items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800">
           <Text className="text-xl">🍽️</Text>
         </View>
       )}
       <View className="flex-1">
-        <Text className="text-base font-semibold text-gray-900" numberOfLines={1}>
+        <Text className="text-base font-semibold text-gray-900 dark:text-gray-50" numberOfLines={1}>
           {recipe.name}
         </Text>
         {recipe.category ? (
-          <Text className="mt-0.5 text-sm text-gray-500" numberOfLines={1}>
+          <Text className="mt-0.5 text-sm text-gray-500 dark:text-gray-400" numberOfLines={1}>
             {recipe.category}
           </Text>
         ) : null}

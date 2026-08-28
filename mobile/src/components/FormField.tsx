@@ -34,7 +34,7 @@ export function FormField<T extends FieldValues>({
       name={name}
       render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
         <View className="mb-4">
-          <Text className="mb-1 text-base text-gray-700">{label}</Text>
+          <Text className="mb-1 text-base text-gray-700 dark:text-gray-300">{label}</Text>
           <View className="relative justify-center">
             <TextInput
               accessibilityLabel={label}
@@ -43,9 +43,9 @@ export function FormField<T extends FieldValues>({
               value={value === undefined || value === null ? '' : String(value)}
               secureTextEntry={showPasswordToggle ? !revealed : secureTextEntry}
               className={
-                'min-h-[44px] rounded-xl border px-4 text-base text-gray-900 ' +
+                'min-h-[44px] rounded-xl border px-4 text-base text-gray-900 dark:text-gray-50 ' +
                 (showPasswordToggle ? 'pr-20 ' : '') +
-                (error ? 'border-red-500' : 'border-gray-300')
+                (error ? 'border-red-500' : 'border-gray-300 dark:border-gray-700')
               }
               {...inputProps}
             />
@@ -63,7 +63,7 @@ export function FormField<T extends FieldValues>({
           {error?.message ? (
             <Text className="mt-1 text-sm text-red-600">{error.message}</Text>
           ) : hint ? (
-            <Text className="mt-1 text-sm text-gray-500">{hint}</Text>
+            <Text className="mt-1 text-sm text-gray-500 dark:text-gray-400">{hint}</Text>
           ) : null}
         </View>
       )}

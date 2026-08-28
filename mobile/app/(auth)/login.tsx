@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { Link } from 'expo-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormField } from '../../src/components/FormField';
+import { KeyboardAvoidingScreen } from '../../src/components/KeyboardAvoidingScreen';
 import { PrimaryButton } from '../../src/components/PrimaryButton';
 import { loginSchema, type LoginInput } from '../../src/validators/auth';
 import { signIn } from '../../src/features/auth/api';
@@ -34,8 +35,8 @@ export default function LoginScreen() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-white" contentContainerClassName="flex-grow justify-center px-6 py-12">
-      <Text className="mb-8 text-2xl font-bold text-gray-900">Entrar</Text>
+    <KeyboardAvoidingScreen className="flex-1 bg-white dark:bg-gray-900" contentContainerClassName="flex-grow justify-center px-6 py-12">
+      <Text className="mb-8 text-2xl font-bold text-gray-900 dark:text-gray-50">Entrar</Text>
 
       <FormField
         control={control}
@@ -72,6 +73,6 @@ export default function LoginScreen() {
       <Link href="/signup" asChild>
         <PrimaryButton label="Criar conta" variant="outline" />
       </Link>
-    </ScrollView>
+    </KeyboardAvoidingScreen>
   );
 }

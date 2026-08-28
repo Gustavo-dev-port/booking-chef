@@ -8,15 +8,38 @@ export function isRecipeType(value: string): value is RecipeType {
 }
 
 /**
- * Ingrediente 100% texto livre (v0.0.1 — ver FASE1-ARQUITETURA-MOBILE.md
- * seção 4): sem busca, sem catálogo. `quantity` precisa ser número de
- * verdade porque `product_ingredients.quantity` no banco é `numeric`, mas
- * `ingredientName`/`unit` são texto livre puro, exatamente como digitados.
+ * Unidades de medida padronizadas (pedido do usuário: padrão brasileiro
+ * de cozinha/bar) — fecha o que era um campo 100% texto livre na Fase 4.
+ * `ingredient_name` continua texto livre; só `unit` virou uma lista
+ * fechada. Ficha antiga com unidade fora dessa lista (texto livre de
+ * antes) continua existindo no banco, só passa a exigir escolher uma
+ * dessas 5 opções na próxima edição.
+ */
+export const INGREDIENT_UNITS = [
+  { value: 'kg', label: 'Kg' },
+  { value: 'g', label: 'g' },
+  { value: 'l', label: 'L' },
+  { value: 'ml', label: 'mL' },
+  { value: 'un', label: 'Un' },
+] as const;
+export type IngredientUnit = (typeof INGREDIENT_UNITS)[number]['value'];
+
+const ingredientUnitValues = INGREDIENT_UNITS.map((u) => u.value) as [IngredientUnit, ...IngredientUnit[]];
+
+export function ingredientUnitLabel(value: string): string {
+  return INGREDIENT_UNITS.find((u) => u.value === value)?.label ?? value;
+}
+
+/**
+ * Ingrediente 100% texto livre pro nome (v0.0.1 — ver
+ * FASE1-ARQUITETURA-MOBILE.md seção 4): sem busca, sem catálogo.
+ * `quantity` precisa ser número de verdade porque
+ * `product_ingredients.quantity` no banco é `numeric`.
  */
 export const ingredientRowSchema = z.object({
   ingredientName: z.string().trim().min(1, 'Informe o ingrediente'),
   quantity: z.coerce.number({ error: 'Informe a quantidade' }).nonnegative('Deve ser 0 ou mais'),
-  unit: z.string().trim().min(1, 'Informe a unidade'),
+  unit: z.enum(ingredientUnitValues, { error: 'Escolha a unidade' }),
 });
 export type IngredientRowInput = z.infer<typeof ingredientRowSchema>;
 

@@ -68,17 +68,17 @@ export default function RecipeListScreen() {
   }, [recipes, search, category, sort]);
 
   return (
-    <View className="flex-1 bg-gray-50 pt-16">
+    <View className="flex-1 bg-gray-50 dark:bg-gray-950 pt-16">
       <View className="px-4">
         <BackButton />
-        <Text className="mb-4 text-2xl font-bold text-gray-900">{RECIPE_TYPE_LABELS[type]}</Text>
+        <Text className="mb-4 text-2xl font-bold text-gray-900 dark:text-gray-50">{RECIPE_TYPE_LABELS[type]}</Text>
 
         <TextInput
           accessibilityLabel="Buscar por nome"
           placeholder="Buscar por nome"
           value={search}
           onChangeText={setSearch}
-          className="mb-3 min-h-[44px] rounded-xl border border-gray-300 bg-white px-4 text-base"
+          className="mb-3 min-h-[44px] rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 text-base"
         />
 
         {categories.length > 0 ? (
@@ -90,10 +90,10 @@ export default function RecipeListScreen() {
               onPress={() => setCategory(null)}
               className={
                 'min-h-[44px] items-center justify-center rounded-full border px-3 py-1 ' +
-                (category === null ? 'border-blue-600 bg-blue-600' : 'border-gray-300 bg-white')
+                (category === null ? 'border-blue-600 bg-blue-600' : 'border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900')
               }
             >
-              <Text className={category === null ? 'text-sm font-semibold text-white' : 'text-sm text-gray-700'}>
+              <Text className={category === null ? 'text-sm font-semibold text-white' : 'text-sm text-gray-700 dark:text-gray-300'}>
                 Todas
               </Text>
             </Pressable>
@@ -106,10 +106,10 @@ export default function RecipeListScreen() {
                 onPress={() => setCategory(c)}
                 className={
                   'min-h-[44px] items-center justify-center rounded-full border px-3 py-1 ' +
-                  (category === c ? 'border-blue-600 bg-blue-600' : 'border-gray-300 bg-white')
+                  (category === c ? 'border-blue-600 bg-blue-600' : 'border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900')
                 }
               >
-                <Text className={category === c ? 'text-sm font-semibold text-white' : 'text-sm text-gray-700'}>
+                <Text className={category === c ? 'text-sm font-semibold text-white' : 'text-sm text-gray-700 dark:text-gray-300'}>
                   {c}
                 </Text>
               </Pressable>
@@ -118,7 +118,7 @@ export default function RecipeListScreen() {
         ) : null}
 
         <View className="mb-3 flex-row items-center gap-2">
-          <Text className="text-sm text-gray-500">Ordenar:</Text>
+          <Text className="text-sm text-gray-500 dark:text-gray-400">Ordenar:</Text>
           <Pressable
             accessibilityRole="radio"
             accessibilityLabel="Ordenar por mais recentes"
@@ -126,11 +126,11 @@ export default function RecipeListScreen() {
             onPress={() => setSort('recent')}
             className="min-h-[44px] justify-center"
           >
-            <Text className={sort === 'recent' ? 'text-sm font-semibold text-blue-600' : 'text-sm text-gray-500'}>
+            <Text className={sort === 'recent' ? 'text-sm font-semibold text-blue-600' : 'text-sm text-gray-500 dark:text-gray-400'}>
               Mais recentes
             </Text>
           </Pressable>
-          <Text className="text-gray-400">·</Text>
+          <Text className="text-gray-400 dark:text-gray-500">·</Text>
           <Pressable
             accessibilityRole="radio"
             accessibilityLabel="Ordenar de A a Z"
@@ -138,7 +138,7 @@ export default function RecipeListScreen() {
             onPress={() => setSort('name')}
             className="min-h-[44px] justify-center"
           >
-            <Text className={sort === 'name' ? 'text-sm font-semibold text-blue-600' : 'text-sm text-gray-500'}>
+            <Text className={sort === 'name' ? 'text-sm font-semibold text-blue-600' : 'text-sm text-gray-500 dark:text-gray-400'}>
               A-Z
             </Text>
           </Pressable>
@@ -158,7 +158,7 @@ export default function RecipeListScreen() {
         ListEmptyComponent={
           !loading ? (
             <View className="mt-12 items-center px-6">
-              <Text className="mb-4 text-center text-base text-gray-500">
+              <Text className="mb-4 text-center text-base text-gray-500 dark:text-gray-400">
                 Você ainda não possui nenhuma ficha técnica
               </Text>
               <Link href={`/recipes/${type}/new`} asChild>

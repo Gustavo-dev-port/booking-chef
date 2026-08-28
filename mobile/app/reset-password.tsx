@@ -4,6 +4,7 @@ import { router } from 'expo-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormField } from '../src/components/FormField';
+import { KeyboardAvoidingScreen } from '../src/components/KeyboardAvoidingScreen';
 import { PrimaryButton } from '../src/components/PrimaryButton';
 import { resetPasswordSchema, type ResetPasswordInput } from '../src/validators/auth';
 import { signOut, updatePassword } from '../src/features/auth/api';
@@ -43,16 +44,16 @@ export default function ResetPasswordScreen() {
 
   if (done) {
     return (
-      <ScrollView className="flex-1 bg-white" contentContainerClassName="flex-grow justify-center px-6">
-        <Text className="text-2xl font-bold text-gray-900">Senha atualizada!</Text>
+      <ScrollView className="flex-1 bg-white dark:bg-gray-900" contentContainerClassName="flex-grow justify-center px-6">
+        <Text className="text-2xl font-bold text-gray-900 dark:text-gray-50">Senha atualizada!</Text>
       </ScrollView>
     );
   }
 
   return (
-    <ScrollView className="flex-1 bg-white" contentContainerClassName="flex-grow justify-center px-6 py-12">
-      <Text className="mb-3 text-2xl font-bold text-gray-900">Nova senha</Text>
-      <Text className="mb-6 text-base text-gray-500">Escolha uma nova senha para sua conta.</Text>
+    <KeyboardAvoidingScreen className="flex-1 bg-white dark:bg-gray-900" contentContainerClassName="flex-grow justify-center px-6 py-12">
+      <Text className="mb-3 text-2xl font-bold text-gray-900 dark:text-gray-50">Nova senha</Text>
+      <Text className="mb-6 text-base text-gray-500 dark:text-gray-400">Escolha uma nova senha para sua conta.</Text>
 
       <FormField
         control={control}
@@ -75,6 +76,6 @@ export default function ResetPasswordScreen() {
       {formError ? <Text className="mb-4 text-sm text-red-600">{formError}</Text> : null}
 
       <PrimaryButton label="Salvar nova senha" onPress={handleSubmit(onSubmit)} loading={isSubmitting} />
-    </ScrollView>
+    </KeyboardAvoidingScreen>
   );
 }

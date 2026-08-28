@@ -100,10 +100,10 @@ export default function BookingScreen() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-white" contentContainerClassName="flex-grow justify-center px-6 py-12">
+    <ScrollView className="flex-1 bg-white dark:bg-gray-900" contentContainerClassName="flex-grow justify-center px-6 py-12">
       <BackButton />
-      <Text className="mb-1 text-2xl font-bold text-gray-900">Gerar Booking</Text>
-      <Text className="mb-8 text-base text-gray-500">
+      <Text className="mb-1 text-2xl font-bold text-gray-900 dark:text-gray-50">Gerar Booking</Text>
+      <Text className="mb-8 text-base text-gray-500 dark:text-gray-400">
         Um PDF com capa, sumário e uma ficha por página — pronto pra imprimir.
       </Text>
 
@@ -118,18 +118,18 @@ export default function BookingScreen() {
               onPress={() => setSelection(option.value)}
               className={
                 'min-h-[44px] flex-row items-center gap-3 rounded-xl border px-4 py-3 ' +
-                (selected ? 'border-blue-600 bg-blue-50' : 'border-gray-300 bg-white')
+                (selected ? 'border-blue-600 bg-blue-50 dark:bg-blue-950' : 'border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900')
               }
             >
               <View
                 className={
                   'h-5 w-5 items-center justify-center rounded-full border-2 ' +
-                  (selected ? 'border-blue-600' : 'border-gray-400')
+                  (selected ? 'border-blue-600' : 'border-gray-400 dark:border-gray-500')
                 }
               >
                 {selected ? <View className="h-2.5 w-2.5 rounded-full bg-blue-600" /> : null}
               </View>
-              <Text className="text-base text-gray-900">{option.label}</Text>
+              <Text className="text-base text-gray-900 dark:text-gray-50">{option.label}</Text>
             </Pressable>
           );
         })}

@@ -1,14 +1,17 @@
 import { useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { Link } from 'expo-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormField } from '../../src/components/FormField';
 import { FormChipSelect } from '../../src/components/FormChipSelect';
 import { FormCheckbox } from '../../src/components/FormCheckbox';
+import { KeyboardAvoidingScreen } from '../../src/components/KeyboardAvoidingScreen';
 import { PrimaryButton } from '../../src/components/PrimaryButton';
 import { EMPLOYEE_RANGES, SEGMENTS, onboardingSchema, type OnboardingInput } from '../../src/validators/onboarding';
+import { isValidCnpj, normalizeCnpj } from '../../src/validators/cnpj';
 import { completeOnboarding } from '../../src/features/auth/api';
+import { lookupCnpj } from '../../src/features/onboarding/cnpjLookup';
 import { useAuthStore } from '../../src/features/auth/store';
 
 /**
@@ -22,9 +25,13 @@ export default function CompanyOnboardingScreen() {
   const session = useAuthStore((s) => s.session);
   const refreshProfile = useAuthStore((s) => s.refreshProfile);
   const [formError, setFormError] = useState<string | null>(null);
+  const [cnpjLookupError, setCnpjLookupError] = useState<string | null>(null);
+  const [lookingUpCnpj, setLookingUpCnpj] = useState(false);
   const {
     control,
     handleSubmit,
+    getValues,
+    setValue,
     formState: { isSubmitting },
   } = useForm<OnboardingInput>({
     resolver: zodResolver(onboardingSchema),
@@ -43,6 +50,30 @@ export default function CompanyOnboardingScreen() {
     },
   });
 
+  const handleLookupCnpj = async () => {
+    setCnpjLookupError(null);
+    const digits = normalizeCnpj(getValues('cnpj'));
+    if (!isValidCnpj(digits)) {
+      setCnpjLookupError('Digite um CNPJ válido antes de buscar.');
+      return;
+    }
+
+    setLookingUpCnpj(true);
+    try {
+      const result = await lookupCnpj(digits);
+      if (!result) {
+        setCnpjLookupError('Não encontramos esse CNPJ. Preencha os dados manualmente.');
+        return;
+      }
+      setValue('legalName', result.legalName, { shouldValidate: true });
+      if (result.tradeName) setValue('tradeName', result.tradeName, { shouldValidate: true });
+      if (result.city) setValue('city', result.city, { shouldValidate: true });
+      if (result.state) setValue('state', result.state, { shouldValidate: true });
+    } finally {
+      setLookingUpCnpj(false);
+    }
+  };
+
   const onSubmit = async (data: OnboardingInput) => {
     if (!session) return;
     setFormError(null);
@@ -55,24 +86,28 @@ export default function CompanyOnboardingScreen() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-white" contentContainerClassName="px-6 py-16">
-      <Text className="mb-1 text-2xl font-bold text-gray-900">Complete seu cadastro</Text>
-      <Text className="mb-6 text-base text-gray-500">
+    <KeyboardAvoidingScreen className="flex-1 bg-white dark:bg-gray-900" contentContainerClassName="px-6 py-16">
+      <Text className="mb-1 text-2xl font-bold text-gray-900 dark:text-gray-50">Complete seu cadastro</Text>
+      <Text className="mb-6 text-base text-gray-500 dark:text-gray-400">
         Precisamos de mais alguns dados seus e do seu estabelecimento.
       </Text>
 
-      <Text className="mb-3 text-base font-semibold text-gray-900">Você</Text>
+      <Text className="mb-3 text-base font-semibold text-gray-900 dark:text-gray-50">Você</Text>
       <FormField control={control} name="name" label="Seu nome" autoComplete="name" />
       <FormField control={control} name="phone" label="Telefone (opcional)" keyboardType="phone-pad" />
 
-      <Text className="mb-3 mt-2 text-base font-semibold text-gray-900">Estabelecimento</Text>
-      <FormField
-        control={control}
-        name="cnpj"
-        label="CNPJ"
-        keyboardType="number-pad"
-        maxLength={18}
-      />
+      <Text className="mb-3 mt-2 text-base font-semibold text-gray-900 dark:text-gray-50">Estabelecimento</Text>
+      <FormField control={control} name="cnpj" label="CNPJ" keyboardType="number-pad" maxLength={18} />
+      <View className="mb-4">
+        <PrimaryButton
+          label="Buscar dados da empresa"
+          variant="outline"
+          onPress={handleLookupCnpj}
+          loading={lookingUpCnpj}
+        />
+        {cnpjLookupError ? <Text className="mt-2 text-sm text-red-600">{cnpjLookupError}</Text> : null}
+      </View>
+
       <FormField control={control} name="legalName" label="Razão social" />
       <FormField control={control} name="tradeName" label="Nome fantasia (opcional)" />
       <FormChipSelect control={control} name="segment" label="Segmento" options={SEGMENTS} />
@@ -107,6 +142,6 @@ export default function CompanyOnboardingScreen() {
       {formError ? <Text className="mb-4 text-sm text-red-600">{formError}</Text> : null}
 
       <PrimaryButton label="Concluir cadastro" onPress={handleSubmit(onSubmit)} loading={isSubmitting} />
-    </ScrollView>
+    </KeyboardAvoidingScreen>
   );
 }

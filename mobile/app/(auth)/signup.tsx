@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { ScrollView, Text } from 'react-native';
+import { Text } from 'react-native';
 import { router } from 'expo-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { BackButton } from '../../src/components/BackButton';
 import { FormField } from '../../src/components/FormField';
+import { KeyboardAvoidingScreen } from '../../src/components/KeyboardAvoidingScreen';
 import { PrimaryButton } from '../../src/components/PrimaryButton';
 import { signupSchema, type SignupInput } from '../../src/validators/auth';
 import { signUp } from '../../src/features/auth/api';
@@ -41,9 +42,9 @@ export default function SignupScreen() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-white" contentContainerClassName="flex-grow justify-center px-6 py-12">
+    <KeyboardAvoidingScreen className="flex-1 bg-white dark:bg-gray-900" contentContainerClassName="flex-grow justify-center px-6 py-12">
       <BackButton />
-      <Text className="mb-8 text-2xl font-bold text-gray-900">Criar conta</Text>
+      <Text className="mb-8 text-2xl font-bold text-gray-900 dark:text-gray-50">Criar conta</Text>
 
       <FormField
         control={control}
@@ -74,6 +75,6 @@ export default function SignupScreen() {
       {formError ? <Text className="mb-4 text-sm text-red-600">{formError}</Text> : null}
 
       <PrimaryButton label="Criar conta" onPress={handleSubmit(onSubmit)} loading={isSubmitting} />
-    </ScrollView>
+    </KeyboardAvoidingScreen>
   );
 }

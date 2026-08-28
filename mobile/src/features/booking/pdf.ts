@@ -1,4 +1,4 @@
-import type { RecipeType } from '../../validators/recipe';
+import { ingredientUnitLabel, type RecipeType } from '../../validators/recipe';
 import type { BookingRecipe } from './api';
 
 export type BookingSection = { type: RecipeType; title: string; recipes: BookingRecipe[] };
@@ -115,7 +115,7 @@ function recipePage(
           ${recipe.ingredients
             .map(
               (i) =>
-                `<tr><td>${escapeHtml(i.ingredient_name)}</td><td>${formatQuantity(i.quantity)}</td><td>${escapeHtml(i.unit)}</td></tr>`
+                `<tr><td>${escapeHtml(i.ingredient_name)}</td><td>${formatQuantity(i.quantity)}</td><td>${escapeHtml(ingredientUnitLabel(i.unit))}</td></tr>`
             )
             .join('')}
         </tbody>

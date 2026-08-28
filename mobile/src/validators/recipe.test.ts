@@ -1,4 +1,4 @@
-import { ingredientRowSchema, isRecipeType, recipeSchema } from './recipe';
+import { ingredientRowSchema, ingredientUnitLabel, isRecipeType, recipeSchema } from './recipe';
 
 describe('isRecipeType', () => {
   it('aceita só "bar" e "cozinha"', () => {
@@ -9,23 +9,48 @@ describe('isRecipeType', () => {
   });
 });
 
+describe('ingredientUnitLabel', () => {
+  it('traduz o código pro rótulo em pt-BR', () => {
+    expect(ingredientUnitLabel('kg')).toBe('Kg');
+    expect(ingredientUnitLabel('ml')).toBe('mL');
+    expect(ingredientUnitLabel('un')).toBe('Un');
+  });
+
+  it('devolve o próprio valor se não reconhecer (ficha antiga com texto livre)', () => {
+    expect(ingredientUnitLabel('unidade')).toBe('unidade');
+  });
+});
+
 describe('ingredientRowSchema', () => {
   it('converte a quantidade digitada (string) pra number', () => {
-    const result = ingredientRowSchema.parse({ ingredientName: 'Limão', quantity: '2.5', unit: 'unidade' });
+    const result = ingredientRowSchema.parse({ ingredientName: 'Limão', quantity: '2.5', unit: 'ml' });
     expect(result.quantity).toBe(2.5);
     expect(typeof result.quantity).toBe('number');
   });
 
   it('rejeita quantidade negativa', () => {
-    expect(
-      ingredientRowSchema.safeParse({ ingredientName: 'Limão', quantity: -1, unit: 'unidade' }).success
-    ).toBe(false);
+    expect(ingredientRowSchema.safeParse({ ingredientName: 'Limão', quantity: -1, unit: 'un' }).success).toBe(
+      false
+    );
   });
 
   it('rejeita ingrediente sem nome', () => {
+    expect(ingredientRowSchema.safeParse({ ingredientName: '', quantity: 1, unit: 'un' }).success).toBe(false);
+  });
+
+  it('rejeita unidade fora da lista fechada (Kg/g/L/mL/Un)', () => {
     expect(
-      ingredientRowSchema.safeParse({ ingredientName: '', quantity: 1, unit: 'unidade' }).success
+      ingredientRowSchema.safeParse({ ingredientName: 'Limão', quantity: 1, unit: 'unidade' }).success
     ).toBe(false);
+    expect(
+      ingredientRowSchema.safeParse({ ingredientName: 'Limão', quantity: 1, unit: 'colher' }).success
+    ).toBe(false);
+  });
+
+  it('aceita as 5 unidades padronizadas', () => {
+    for (const unit of ['kg', 'g', 'l', 'ml', 'un']) {
+      expect(ingredientRowSchema.safeParse({ ingredientName: 'Limão', quantity: 1, unit }).success).toBe(true);
+    }
   });
 });
 
@@ -39,10 +64,10 @@ describe('recipeSchema', () => {
     finalWeight: '',
     instructions: 'Bata tudo.',
     notes: '',
-    ingredients: [{ ingredientName: 'Limão', quantity: '1', unit: 'unidade' }],
+    ingredients: [{ ingredientName: 'Limão', quantity: '1', unit: 'un' }],
   };
 
-  it('aceita uma ficha válida, com ingredientes texto livre', () => {
+  it('aceita uma ficha válida', () => {
     expect(recipeSchema.safeParse(base).success).toBe(true);
   });
 

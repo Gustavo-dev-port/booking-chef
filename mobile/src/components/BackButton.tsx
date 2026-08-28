@@ -18,7 +18,7 @@ export function BackButton() {
       hitSlop={8}
       className="mb-4 h-11 w-11 items-center justify-center"
     >
-      <Text className="text-2xl text-gray-900">←</Text>
+      <Text className="text-2xl text-gray-900 dark:text-gray-50">←</Text>
     </Pressable>
   );
 }

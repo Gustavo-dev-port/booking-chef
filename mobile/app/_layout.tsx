@@ -2,15 +2,21 @@ import '../global.css';
 import { useEffect } from 'react';
 import * as Linking from 'expo-linking';
 import { SplashScreen, Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { startAuthListener, useAuthStore } from '../src/features/auth/store';
 import { handleRecoveryUrl } from '../src/features/auth/recovery';
+import { loadThemePreference, useThemeStore } from '../src/features/theme/store';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
+      {/* "auto" = ícones da barra de status seguem o tema (claro/escuro)
+          automaticamente, inclusive quando o usuário troca manualmente
+          pela tela de Perfil. */}
+      <StatusBar style="auto" />
       <RootNavigator />
     </SafeAreaProvider>
   );
@@ -36,15 +42,17 @@ function RootNavigator() {
   const membership = useAuthStore((s) => s.membership);
   const isLoading = useAuthStore((s) => s.isLoading);
   const isRecovering = useAuthStore((s) => s.isRecovering);
+  const themeLoaded = useThemeStore((s) => s.loaded);
   const url = Linking.useURL();
 
   useEffect(() => {
     startAuthListener();
+    loadThemePreference();
   }, []);
 
   useEffect(() => {
-    if (!isLoading) SplashScreen.hideAsync();
-  }, [isLoading]);
+    if (!isLoading && themeLoaded) SplashScreen.hideAsync();
+  }, [isLoading, themeLoaded]);
 
   useEffect(() => {
     // Só navega depois que o Stack já existe (isLoading false) — chamar
@@ -53,7 +61,7 @@ function RootNavigator() {
     handleRecoveryUrl(url);
   }, [url, isLoading]);
 
-  if (isLoading) return null;
+  if (isLoading || !themeLoaded) return null;
 
   const onboardingComplete = !!profile && !!membership;
 
