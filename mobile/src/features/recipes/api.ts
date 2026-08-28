@@ -1,5 +1,6 @@
 import { supabase } from '../../lib/supabase';
 import type { IngredientRowInput, RecipeInput, RecipeType } from '../../validators/recipe';
+import { reconcileIngredients } from './reconciliation';
 
 export type RecipeSummary = {
   id: string;
@@ -73,7 +74,7 @@ export async function getRecipe(id: string): Promise<RecipeDetail | null> {
   };
 }
 
-async function replaceIngredients(productId: string, rows: IngredientRowInput[]): Promise<void> {
+async function replaceIngredients(companyId: string, productId: string, rows: IngredientRowInput[]): Promise<void> {
   const { error: deleteError } = await supabase
     .from('product_ingredients')
     .delete()
@@ -91,6 +92,10 @@ async function replaceIngredients(productId: string, rows: IngredientRowInput[])
     }))
   );
   if (insertError) throw new Error(insertError.message);
+
+  // Fase 8 — conciliação de insumos (best-effort: não trava o salvamento
+  // da ficha se falhar). Ver src/features/recipes/reconciliation.ts.
+  await reconcileIngredients(companyId, productId, rows);
 }
 
 function toProductRow(input: RecipeInput) {
@@ -117,15 +122,15 @@ export async function createRecipe(companyId: string, type: RecipeType, input: R
     .single();
   if (error) throw new Error(error.message);
 
-  await replaceIngredients(data.id, input.ingredients);
+  await replaceIngredients(companyId, data.id, input.ingredients);
   return data.id;
 }
 
-export async function updateRecipe(id: string, input: RecipeInput): Promise<void> {
+export async function updateRecipe(companyId: string, id: string, input: RecipeInput): Promise<void> {
   const { error } = await supabase.from('products').update(toProductRow(input)).eq('id', id);
   if (error) throw new Error(error.message);
 
-  await replaceIngredients(id, input.ingredients);
+  await replaceIngredients(companyId, id, input.ingredients);
 }
 
 export async function setRecipePhoto(id: string, photoPath: string): Promise<void> {

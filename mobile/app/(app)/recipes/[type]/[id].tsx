@@ -104,7 +104,7 @@ export default function RecipeEditorScreen() {
     setFormError(null);
     try {
       const id = isNew ? await createRecipe(companyId, type, data) : params.id;
-      if (!isNew) await updateRecipe(id, data);
+      if (!isNew) await updateRecipe(companyId, id, data);
 
       if (pickedPhoto) {
         const path = await uploadRecipePhoto(companyId, id, pickedPhoto);
