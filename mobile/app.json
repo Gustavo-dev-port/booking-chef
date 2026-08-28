@@ -12,9 +12,11 @@
       "expo-router"
     ],
     "ios": {
+      "bundleIdentifier": "com.barujiru.bookingchef",
       "supportsTablet": true
     },
     "android": {
+      "package": "com.barujiru.bookingchef",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
