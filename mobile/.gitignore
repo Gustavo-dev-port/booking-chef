@@ -40,3 +40,7 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# builds baixados localmente (o artefato de verdade fica no EAS)
+*.apk
+*.aab
