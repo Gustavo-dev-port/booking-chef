@@ -1,33 +1,35 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, Image, Pressable, Text, View } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { Alert, Image, Pressable, Text, TextInput, View } from 'react-native';
+import { Link, router, useLocalSearchParams } from 'expo-router';
 import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { BackButton } from '../../../../src/components/BackButton';
-import { FormField } from '../../../../src/components/FormField';
-import { IngredientCatalogPicker } from '../../../../src/components/IngredientCatalogPicker';
-import { KeyboardAvoidingScreen } from '../../../../src/components/KeyboardAvoidingScreen';
-import { PrimaryButton } from '../../../../src/components/PrimaryButton';
-import { UnitPicker } from '../../../../src/components/UnitPicker';
+import { BackButton } from '../../../../../src/components/BackButton';
+import { FormField } from '../../../../../src/components/FormField';
+import { IngredientCatalogPicker } from '../../../../../src/components/IngredientCatalogPicker';
+import { KeyboardAvoidingScreen } from '../../../../../src/components/KeyboardAvoidingScreen';
+import { PrimaryButton } from '../../../../../src/components/PrimaryButton';
+import { UnitPicker } from '../../../../../src/components/UnitPicker';
 import {
   recipeSchema,
   isRecipeType,
   ingredientUnitLabel,
   type RecipeInput,
   type RecipeFormValues,
-} from '../../../../src/validators/recipe';
+} from '../../../../../src/validators/recipe';
 import {
   archiveRecipe,
   createRecipe,
   getRecipe,
   setRecipePhoto,
   updateRecipe,
-} from '../../../../src/features/recipes/api';
-import { calculateCmv } from '../../../../src/features/recipes/cmv';
-import { pickPhoto, uploadRecipePhoto, type PickedPhoto } from '../../../../src/features/recipes/photos';
-import { listCategories, listInventoryItems, type InventoryItem, type NamedOption } from '../../../../src/features/inventory/api';
-import { useRecipePhotoUrl } from '../../../../src/hooks/useRecipePhotoUrl';
-import { useAuthStore } from '../../../../src/features/auth/store';
+} from '../../../../../src/features/recipes/api';
+import { calculateCmv } from '../../../../../src/features/recipes/cmv';
+import { saveCostSnapshot } from '../../../../../src/features/recipes/costSnapshot';
+import { suggestPrices } from '../../../../../src/features/recipes/pricing';
+import { pickPhoto, uploadRecipePhoto, type PickedPhoto } from '../../../../../src/features/recipes/photos';
+import { listCategories, listInventoryItems, type InventoryItem, type NamedOption } from '../../../../../src/features/inventory/api';
+import { useRecipePhotoUrl } from '../../../../../src/hooks/useRecipePhotoUrl';
+import { useAuthStore } from '../../../../../src/features/auth/store';
 
 const EMPTY_VALUES: RecipeFormValues = {
   name: '',
@@ -155,6 +157,15 @@ export default function RecipeEditorScreen() {
     [watchedIngredients, watchedSalePrice, costById]
   );
 
+  // Calculadora de preço sugerido (07.4) — usa o custo total já calculado
+  // acima; "Usar este preço" preenche salePrice mediante confirmação
+  // explícita (o próprio toque no botão), nunca sozinho.
+  const [desiredCmv, setDesiredCmv] = useState('30');
+  const suggested = useMemo(
+    () => suggestPrices(cmv.totalCost, Number(desiredCmv.replace(',', '.')) || 0),
+    [cmv.totalCost, desiredCmv]
+  );
+
   const onSubmit = async (data: RecipeInput) => {
     if (!companyId) return;
     setFormError(null);
@@ -166,6 +177,10 @@ export default function RecipeEditorScreen() {
         const path = await uploadRecipePhoto(companyId, id, pickedPhoto);
         await setRecipePhoto(id, path);
       }
+
+      // 07.3 — snapshot de custo a cada salvamento; best-effort, nunca
+      // trava o salvamento da ficha (ver costSnapshot.ts).
+      await saveCostSnapshot(id, cmv, data.salePrice);
 
       router.back();
     } catch (error) {
@@ -337,7 +352,57 @@ export default function RecipeEditorScreen() {
             Algum ingrediente ainda não está vinculado ao estoque — o custo total pode estar incompleto.
           </Text>
         ) : null}
+        {!isNew ? (
+          <Link href={`/recipes/${type}/${params.id}/cost-history`} asChild>
+            <Pressable accessibilityRole="button" className="mt-2 min-h-[32px] justify-center">
+              <Text className="text-sm font-medium text-blue-600">Ver histórico de custo</Text>
+            </Pressable>
+          </Link>
+        ) : null}
       </View>
+
+      {cmv.totalCost > 0 ? (
+        <View className="mb-4 rounded-xl border border-gray-200 dark:border-gray-700 p-3">
+          <Text className="mb-2 text-base font-semibold text-gray-900 dark:text-gray-50">
+            Calculadora de preço sugerido
+          </Text>
+          <View className="mb-3 flex-row items-center gap-2">
+            <Text className="text-sm text-gray-700 dark:text-gray-300">CMV desejado (%)</Text>
+            <TextInput
+              accessibilityLabel="CMV desejado"
+              keyboardType="decimal-pad"
+              value={desiredCmv}
+              onChangeText={setDesiredCmv}
+              className="min-h-[36px] w-16 rounded-lg border border-gray-300 dark:border-gray-700 px-2 text-center text-base text-gray-900 dark:text-gray-50"
+            />
+          </View>
+
+          <View className="flex-row gap-2">
+            {(
+              [
+                { key: 'minimum', label: 'Mínimo', value: suggested.minimum },
+                { key: 'ideal', label: 'Ideal', value: suggested.ideal },
+                { key: 'premium', label: 'Premium', value: suggested.premium },
+              ] as const
+            ).map((tier) => (
+              <View key={tier.key} className="flex-1 items-center rounded-xl border border-gray-200 dark:border-gray-800 p-2">
+                <Text className="text-xs text-gray-500 dark:text-gray-400">{tier.label}</Text>
+                <Text className="mb-2 text-base font-semibold text-gray-900 dark:text-gray-50">
+                  R$ {tier.value.toFixed(2)}
+                </Text>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`Usar preço ${tier.label}`}
+                  onPress={() => setValue('salePrice', tier.value)}
+                  className="min-h-[32px] items-center justify-center rounded-lg bg-blue-600 px-2"
+                >
+                  <Text className="text-xs font-semibold text-white">Usar este preço</Text>
+                </Pressable>
+              </View>
+            ))}
+          </View>
+        </View>
+      ) : null}
 
       <FormField control={control} name="category" label="Categoria (opcional)" />
       <FormField control={control} name="yieldAmount" label="Rendimento (ex.: 1 dose, 4 porções)" />

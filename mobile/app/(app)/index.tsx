@@ -56,6 +56,11 @@ export default function HomeScreen() {
         <ModuleCard icon="📦" title="Estoque" subtitle="Insumos" onPress={() => router.push('/inventory')} />
       </View>
 
+      <View className="mt-3 flex-row gap-3">
+        <ModuleCard icon="👥" title="Equipe" subtitle="Convites" onPress={() => router.push('/team')} />
+        <View className="flex-1" />
+      </View>
+
       <Text className="mb-3 mt-8 text-sm font-semibold text-gray-500 dark:text-gray-400">Últimas fichas editadas</Text>
       {recent.length === 0 ? (
         <Text className="text-sm text-gray-500 dark:text-gray-400">Nenhuma ficha editada ainda</Text>
