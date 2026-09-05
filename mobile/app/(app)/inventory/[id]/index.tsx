@@ -1,19 +1,19 @@
 import { useEffect, useState } from 'react';
 import { Alert, Text, View } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { Link, router, useLocalSearchParams } from 'expo-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { BackButton } from '../../../src/components/BackButton';
-import { FormField } from '../../../src/components/FormField';
-import { KeyboardAvoidingScreen } from '../../../src/components/KeyboardAvoidingScreen';
-import { PickerWithCreate } from '../../../src/components/PickerWithCreate';
-import { PrimaryButton } from '../../../src/components/PrimaryButton';
-import { UnitPicker } from '../../../src/components/UnitPicker';
+import { BackButton } from '../../../../src/components/BackButton';
+import { FormField } from '../../../../src/components/FormField';
+import { KeyboardAvoidingScreen } from '../../../../src/components/KeyboardAvoidingScreen';
+import { PickerWithCreate } from '../../../../src/components/PickerWithCreate';
+import { PrimaryButton } from '../../../../src/components/PrimaryButton';
+import { UnitPicker } from '../../../../src/components/UnitPicker';
 import {
   inventoryItemSchema,
   type InventoryItemFormValues,
   type InventoryItemInput,
-} from '../../../src/validators/inventory';
+} from '../../../../src/validators/inventory';
 import {
   archiveInventoryItem,
   createCategory,
@@ -24,8 +24,8 @@ import {
   listSuppliers,
   updateInventoryItem,
   type NamedOption,
-} from '../../../src/features/inventory/api';
-import { useAuthStore } from '../../../src/features/auth/store';
+} from '../../../../src/features/inventory/api';
+import { useAuthStore } from '../../../../src/features/auth/store';
 
 const EMPTY_VALUES: InventoryItemFormValues = {
   name: '',
@@ -40,9 +40,9 @@ const EMPTY_VALUES: InventoryItemFormValues = {
 
 /**
  * Cadastro/edição de insumo (V2, Épico 06 — Estoque, história 06.1).
- * `current_quantity` nunca aparece aqui, de propósito: só é alterado via
- * lançamento de movimentação (Sprint 2, ainda não construído) — ver
- * comentário na coluna, docs/07_DATABASE.md.
+ * `current_quantity` nunca aparece aqui, de propósito: só muda via
+ * lançamento de movimentação — ver app/(app)/inventory/[id]/movements.tsx
+ * e a função register_inventory_movement() no banco.
  */
 export default function InventoryItemEditorScreen() {
   const params = useLocalSearchParams<{ id: string }>();
@@ -140,6 +140,13 @@ export default function InventoryItemEditorScreen() {
       </Text>
 
       <FormField control={control} name="name" label="Nome" />
+
+      {!isNew ? (
+        <Link href={`/inventory/${params.id}/movements`} asChild>
+          <PrimaryButton label="Lançar movimentação / ver histórico" variant="outline" />
+        </Link>
+      ) : null}
+      {!isNew ? <View className="mb-4" /> : null}
 
       <PickerWithCreate
         control={control}
