@@ -123,6 +123,10 @@ data: "30 de agosto de 2026"
 ## 3. Fase 2 — estoque, custo e equipe (planejado)
 
 > **Nota de arquitetura:** antes de implementar `inventory_items` e `employees`, avaliar se devem estender `ingredients` e `company_users` (já existentes e já validados) em vez de nascer como tabelas paralelas — mesmo princípio já aplicado com sucesso na Fase 1 (`products` reaproveitado em vez de `recipes` novo). As tabelas abaixo são especificadas de forma independente, como pedido, precisamente para que essa decisão de arquitetura possa ser tomada por comparação direta.
+>
+> **Decisão registrada (Sprint 1, spike concluído):**
+> - **Estoque → estender `ingredients`.** Insumo de estoque é o mesmo insumo já usado na ficha técnica (Fase 1/8, conciliação); uma tabela `inventory_items` paralela criaria dois catálogos do mesmo insumo real podendo divergir. Migration aplicada: `ingredients` ganhou `current_quantity`, `minimum_quantity`, `internal_code`, `barcode`, `supplier_id` (FK pra `suppliers`, tabela nova de verdade — sem análogo na Fase 1). `current_quantity` só deve mudar via `inventory_movements` (Sprint 2) — a Sprint 1 só cria/lê insumos com saldo inicial 0.
+> - **Equipe → `employees` paralela, como especificado abaixo.** Decisão consciente de não reaproveitar `company_users`: a tabela real tem `user_id` `NOT NULL` (incompatível com convite pendente, sem conta ainda) e só é escrita via `create_company_with_owner`, sem `INSERT`/`UPDATE` liberado — reaproveitar exigiria afrouxar essa trava já endurecida pra suportar convite/remoção. `employees` nasce isolada com sua própria policy de RLS por `company_id`, ainda não integrada a `is_member_of_company()` (isso é trabalho da Sprint 4, junto com o Épico 08).
 
 ### `employees`
 
