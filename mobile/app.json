@@ -9,7 +9,14 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Autorize o acesso às fotos para adicionar uma imagem à ficha.",
+          "cameraPermission": "Autorize o acesso à câmera para tirar uma foto da ficha."
+        }
+      ]
     ],
     "ios": {
       "bundleIdentifier": "com.barujiru.bookingchef",

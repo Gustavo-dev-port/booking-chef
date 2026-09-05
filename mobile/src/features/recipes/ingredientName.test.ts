@@ -1,4 +1,4 @@
-import { normalizeIngredientName } from './ingredientName';
+import { normalizeIngredientName, findSimilarExistingName } from './ingredientName';
 
 describe('normalizeIngredientName', () => {
   it('ignora maiúsculas/minúsculas', () => {
@@ -20,5 +20,23 @@ describe('normalizeIngredientName', () => {
   it('não junta insumos diferentes só porque o nome é parecido', () => {
     expect(normalizeIngredientName('Limão')).not.toBe(normalizeIngredientName('Limão siciliano'));
     expect(normalizeIngredientName('Limão')).not.toBe(normalizeIngredientName('Laranja'));
+  });
+});
+
+describe('findSimilarExistingName', () => {
+  it('acha duplicata exata, ignorando caixa e acento', () => {
+    expect(findSimilarExistingName('agua', ['Água', 'Vodka'])).toBe('Água');
+  });
+
+  it('acha nome quase igual (erro de digitação)', () => {
+    expect(findSimilarExistingName('Vermuth', ['Vermute', 'Whisky'])).toBe('Vermute');
+  });
+
+  it('não confunde insumos genuinamente diferentes', () => {
+    expect(findSimilarExistingName('Vodka', ['Whisky', 'Gin', 'Água'])).toBeNull();
+  });
+
+  it('retorna null quando a lista existente está vazia', () => {
+    expect(findSimilarExistingName('Vodka', [])).toBeNull();
   });
 });
