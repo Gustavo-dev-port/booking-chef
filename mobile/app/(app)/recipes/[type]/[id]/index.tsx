@@ -424,7 +424,7 @@ export default function RecipeEditorScreen() {
       ) : null}
 
       <FormField control={control} name="category" label="Categoria (opcional)" />
-      <FormField control={control} name="yieldAmount" label="Rendimento (ex.: 1 dose, 4 porções)" />
+      <FormField control={control} name="yieldAmount" label="Rendimento" placeholder="Ex.: 1 dose, 4 porções" />
 
       {type === 'bar' ? (
         <>

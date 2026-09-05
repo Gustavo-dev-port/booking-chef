@@ -203,7 +203,7 @@ export default function InventoryItemEditorScreen() {
             name="packageContent"
             label={`${usageUnitLabel} por ${purchaseUnitLabel}`}
             keyboardType="decimal-pad"
-            hint={`Ex.: 750 se 1 ${purchaseUnitLabel} tem 750 ${usageUnitLabel}`}
+            placeholder={`Ex.: 750`}
           />
         </View>
         <View className="flex-1">
