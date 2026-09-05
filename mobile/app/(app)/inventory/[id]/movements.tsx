@@ -98,12 +98,12 @@ export default function InventoryMovementsScreen() {
   const activeUnitLabel = hasPackaging && inputMode === 'purchase' ? purchaseUnitLabel : unitLabel;
 
   return (
-    <View className="flex-1 bg-gray-50 dark:bg-gray-950 pt-16">
+    <View className="flex-1 bg-surface-page dark:bg-surface-page-dark pt-16">
       <View className="px-4">
         <BackButton />
-        <Text className="mb-1 text-2xl font-bold text-gray-900 dark:text-gray-50">{item?.name ?? 'Insumo'}</Text>
+        <Text className="mb-1 text-2xl font-archivo-bold text-ink dark:text-ink-dark">{item?.name ?? 'Insumo'}</Text>
         {item ? (
-          <Text className="mb-4 text-base text-gray-500 dark:text-gray-400">
+          <Text className="mb-4 text-base text-ink-secondary dark:text-ink-secondary-dark">
             Saldo atual: {item.current_quantity} {unitLabel}
           </Text>
         ) : null}
@@ -120,10 +120,10 @@ export default function InventoryMovementsScreen() {
                 onPress={() => setType(option.value)}
                 className={
                   'min-h-[44px] items-center justify-center rounded-full border px-4 py-2 ' +
-                  (selected ? 'border-blue-600 bg-blue-600' : 'border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900')
+                  (selected ? 'border-brand dark:border-brand-dark bg-brand dark:bg-brand-dark' : 'border-surface-input-border dark:border-surface-border-dark bg-surface-card dark:bg-surface-card-dark')
                 }
               >
-                <Text className={selected ? 'text-sm font-semibold text-white' : 'text-sm text-gray-700 dark:text-gray-300'}>
+                <Text className={selected ? 'text-sm font-archivo-semibold text-white' : 'text-sm text-ink dark:text-ink-dark'}>
                   {option.label}
                 </Text>
               </Pressable>
@@ -140,10 +140,10 @@ export default function InventoryMovementsScreen() {
               onPress={() => setInputMode('purchase')}
               className={
                 'min-h-[44px] flex-1 items-center justify-center rounded-full border px-3 py-2 ' +
-                (inputMode === 'purchase' ? 'border-blue-600 bg-blue-600' : 'border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900')
+                (inputMode === 'purchase' ? 'border-brand dark:border-brand-dark bg-brand dark:bg-brand-dark' : 'border-surface-input-border dark:border-surface-border-dark bg-surface-card dark:bg-surface-card-dark')
               }
             >
-              <Text className={inputMode === 'purchase' ? 'text-sm font-semibold text-white' : 'text-sm text-gray-700 dark:text-gray-300'}>
+              <Text className={inputMode === 'purchase' ? 'text-sm font-archivo-semibold text-white' : 'text-sm text-ink dark:text-ink-dark'}>
                 Em {purchaseUnitLabel} (compra)
               </Text>
             </Pressable>
@@ -154,17 +154,17 @@ export default function InventoryMovementsScreen() {
               onPress={() => setInputMode('usage')}
               className={
                 'min-h-[44px] flex-1 items-center justify-center rounded-full border px-3 py-2 ' +
-                (inputMode === 'usage' ? 'border-blue-600 bg-blue-600' : 'border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900')
+                (inputMode === 'usage' ? 'border-brand dark:border-brand-dark bg-brand dark:bg-brand-dark' : 'border-surface-input-border dark:border-surface-border-dark bg-surface-card dark:bg-surface-card-dark')
               }
             >
-              <Text className={inputMode === 'usage' ? 'text-sm font-semibold text-white' : 'text-sm text-gray-700 dark:text-gray-300'}>
+              <Text className={inputMode === 'usage' ? 'text-sm font-archivo-semibold text-white' : 'text-sm text-ink dark:text-ink-dark'}>
                 Em {unitLabel} (uso)
               </Text>
             </Pressable>
           </View>
         ) : null}
 
-        <Text className="mb-1 text-base text-gray-700 dark:text-gray-300">
+        <Text className="mb-1 text-base text-ink dark:text-ink-dark">
           {type === 'ajuste' ? `Novo saldo contado (${activeUnitLabel})` : `Quantidade (${activeUnitLabel})`}
         </Text>
         <TextInput
@@ -172,24 +172,24 @@ export default function InventoryMovementsScreen() {
           keyboardType="decimal-pad"
           value={quantity}
           onChangeText={setQuantity}
-          className="mb-3 min-h-[44px] rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 text-base text-gray-900 dark:text-gray-50"
+          className="mb-3 min-h-[44px] rounded-xl border border-surface-input-border dark:border-surface-border-dark bg-surface-card dark:bg-surface-card-dark px-4 text-base text-ink dark:text-ink-dark"
         />
 
-        <Text className="mb-1 text-base text-gray-700 dark:text-gray-300">Motivo (opcional)</Text>
+        <Text className="mb-1 text-base text-ink dark:text-ink-dark">Motivo (opcional)</Text>
         <TextInput
           accessibilityLabel="Motivo"
           value={reason}
           onChangeText={setReason}
-          className="mb-3 min-h-[44px] rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 text-base text-gray-900 dark:text-gray-50"
+          className="mb-3 min-h-[44px] rounded-xl border border-surface-input-border dark:border-surface-border-dark bg-surface-card dark:bg-surface-card-dark px-4 text-base text-ink dark:text-ink-dark"
         />
 
-        {formError ? <Text className="mb-3 text-sm text-red-600">{formError}</Text> : null}
+        {formError ? <Text className="mb-3 text-sm text-danger dark:text-danger-dark">{formError}</Text> : null}
 
         <View className="mb-6">
           <PrimaryButton label="Lançar movimentação" onPress={handleSubmit} loading={submitting} />
         </View>
 
-        <Text className="mb-3 text-base font-semibold text-gray-900 dark:text-gray-50">Histórico</Text>
+        <Text className="mb-3 text-base font-archivo-semibold text-ink dark:text-ink-dark">Histórico</Text>
       </View>
 
       <FlatList
@@ -198,19 +198,19 @@ export default function InventoryMovementsScreen() {
         contentContainerClassName="px-4 pb-12"
         refreshControl={<RefreshControl refreshing={loading} onRefresh={load} />}
         renderItem={({ item: movement }) => (
-          <View className="mb-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3">
+          <View className="mb-2 rounded-xl border border-surface-border dark:border-surface-border-dark bg-surface-card dark:bg-surface-card-dark p-3">
             <View className="flex-row items-center justify-between">
-              <Text className="text-base font-semibold text-gray-900 dark:text-gray-50">
+              <Text className="text-base font-archivo-semibold text-ink dark:text-ink-dark">
                 {movementTypeLabel(movement.type)}
               </Text>
-              <Text className="text-base text-gray-900 dark:text-gray-50">
+              <Text className="text-base text-ink dark:text-ink-dark">
                 {movement.quantity} {unitLabel}
               </Text>
             </View>
             {movement.reason ? (
-              <Text className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">{movement.reason}</Text>
+              <Text className="mt-0.5 text-sm text-ink-secondary dark:text-ink-secondary-dark">{movement.reason}</Text>
             ) : null}
-            <Text className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            <Text className="mt-1 text-xs text-ink-secondary dark:text-ink-secondary-dark">
               {movement.created_by === session?.user.id ? profile?.name || 'Você' : 'Outro usuário'} ·{' '}
               {formatDate(movement.created_at)}
             </Text>
@@ -218,7 +218,7 @@ export default function InventoryMovementsScreen() {
         )}
         ListEmptyComponent={
           !loading ? (
-            <Text className="mt-4 text-center text-base text-gray-500 dark:text-gray-400">
+            <Text className="mt-4 text-center text-base text-ink-secondary dark:text-ink-secondary-dark">
               Nenhuma movimentação lançada ainda.
             </Text>
           ) : null

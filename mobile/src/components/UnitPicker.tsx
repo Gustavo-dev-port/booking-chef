@@ -25,21 +25,21 @@ export function UnitPicker<T extends FieldValues>({ control, name, label = 'Unid
         const selected = INGREDIENT_UNITS.find((u) => u.value === value);
         return (
           <View>
-            <Text className="mb-1 text-base text-gray-700 dark:text-gray-300">{label}</Text>
+            <Text className="mb-1 text-base text-ink dark:text-ink-dark">{label}</Text>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={label}
               onPress={() => setOpen(true)}
               className={
                 'min-h-[44px] items-center justify-center rounded-xl border px-3 ' +
-                (error ? 'border-red-500' : 'border-gray-300 dark:border-gray-700')
+                (error ? 'border-danger dark:border-danger-dark' : 'border-surface-input-border dark:border-surface-border-dark')
               }
             >
-              <Text className={selected ? 'text-base text-gray-900 dark:text-gray-50' : 'text-base text-gray-400 dark:text-gray-500'}>
+              <Text className={selected ? 'text-base text-ink dark:text-ink-dark' : 'text-base text-ink-secondary dark:text-ink-dark0'}>
                 {selected ? selected.label : 'Un.'}
               </Text>
             </Pressable>
-            {error?.message ? <Text className="mt-1 text-sm text-red-600">{error.message}</Text> : null}
+            {error?.message ? <Text className="mt-1 text-sm text-danger dark:text-danger-dark">{error.message}</Text> : null}
 
             <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
               <Pressable
@@ -47,8 +47,8 @@ export function UnitPicker<T extends FieldValues>({ control, name, label = 'Unid
                 className="flex-1 justify-end bg-black/40"
                 onPress={() => setOpen(false)}
               >
-                <View className="rounded-t-2xl bg-white dark:bg-gray-900 p-4 pb-8">
-                  <Text className="mb-2 text-base font-semibold text-gray-900 dark:text-gray-50">Unidade</Text>
+                <View className="rounded-t-2xl bg-surface-card dark:bg-surface-card-dark p-4 pb-8">
+                  <Text className="mb-2 text-base font-archivo-semibold text-ink dark:text-ink-dark">Unidade</Text>
                   {INGREDIENT_UNITS.map((unit) => (
                     <Pressable
                       key={unit.value}
@@ -58,11 +58,11 @@ export function UnitPicker<T extends FieldValues>({ control, name, label = 'Unid
                         onChange(unit.value);
                         setOpen(false);
                       }}
-                      className="min-h-[44px] justify-center border-b border-gray-100 dark:border-gray-800 px-2"
+                      className="min-h-[44px] justify-center border-b border-surface-border dark:border-surface-border-dark px-2"
                     >
                       <Text
                         className={
-                          value === unit.value ? 'text-base font-semibold text-blue-600' : 'text-base text-gray-900 dark:text-gray-50'
+                          value === unit.value ? 'text-base font-archivo-semibold text-brand dark:text-brand-dark' : 'text-base text-ink dark:text-ink-dark'
                         }
                       >
                         {unit.label}

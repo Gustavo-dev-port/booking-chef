@@ -26,15 +26,15 @@ export function IngredientCatalogPicker({ items, onSelect }: IngredientCatalogPi
         accessibilityRole="button"
         accessibilityLabel="Vincular ao estoque"
         onPress={() => setOpen(true)}
-        className="min-h-[44px] items-center justify-center rounded-xl border border-dashed border-blue-600 px-3"
+        className="min-h-[44px] items-center justify-center rounded-xl border border-dashed border-brand dark:border-brand-dark px-3"
       >
-        <Text className="text-sm font-medium text-blue-600">🔗 Estoque</Text>
+        <Text className="text-sm font-archivo-medium text-brand dark:text-brand-dark">🔗 Estoque</Text>
       </Pressable>
 
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
         <Pressable accessibilityLabel="Fechar" className="flex-1 justify-end bg-black/40" onPress={() => setOpen(false)}>
-          <View className="max-h-[70%] rounded-t-2xl bg-white dark:bg-gray-900 p-4">
-            <Text className="mb-2 text-base font-semibold text-gray-900 dark:text-gray-50">
+          <View className="max-h-[70%] rounded-t-2xl bg-surface-card dark:bg-surface-card-dark p-4">
+            <Text className="mb-2 text-base font-archivo-semibold text-ink dark:text-ink-dark">
               Selecionar do estoque
             </Text>
             <TextInput
@@ -43,7 +43,7 @@ export function IngredientCatalogPicker({ items, onSelect }: IngredientCatalogPi
               value={search}
               onChangeText={setSearch}
               autoFocus
-              className="mb-3 min-h-[44px] rounded-xl border border-gray-300 dark:border-gray-700 px-4 text-base text-gray-900 dark:text-gray-50"
+              className="mb-3 min-h-[44px] rounded-xl border border-surface-input-border dark:border-surface-border-dark px-4 text-base text-ink dark:text-ink-dark"
             />
             <FlatList
               data={visible}
@@ -57,18 +57,18 @@ export function IngredientCatalogPicker({ items, onSelect }: IngredientCatalogPi
                     setOpen(false);
                     setSearch('');
                   }}
-                  className="min-h-[44px] flex-row items-center justify-between border-b border-gray-100 dark:border-gray-800 py-3"
+                  className="min-h-[44px] flex-row items-center justify-between border-b border-surface-border dark:border-surface-border-dark py-3"
                 >
-                  <Text className="flex-1 pr-2 text-base text-gray-900 dark:text-gray-50" numberOfLines={1}>
+                  <Text className="flex-1 pr-2 text-base text-ink dark:text-ink-dark" numberOfLines={1}>
                     {item.name}
                   </Text>
-                  <Text className="text-sm text-gray-500 dark:text-gray-400">
+                  <Text className="text-sm text-ink-secondary dark:text-ink-secondary-dark">
                     R$ {(item.unit_cost ?? 0).toFixed(2)}/{ingredientUnitLabel(item.usage_unit)}
                   </Text>
                 </Pressable>
               )}
               ListEmptyComponent={
-                <Text className="py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                <Text className="py-4 text-center text-sm text-ink-secondary dark:text-ink-secondary-dark">
                   {items.length === 0
                     ? 'Nenhum insumo cadastrado no estoque ainda.'
                     : 'Nenhum insumo encontrado.'}

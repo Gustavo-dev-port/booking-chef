@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { Link, useFocusEffect, useRouter } from 'expo-router';
+import { BookOpen, ChefHat, Martini, Package, Users } from 'lucide-react-native';
 import { ModuleCard } from '../../src/components/ModuleCard';
 import { RecipeCard } from '../../src/components/RecipeCard';
 import { listRecentRecipes, type RecipeSummary } from '../../src/features/recipes/api';
@@ -31,26 +32,26 @@ export default function HomeScreen() {
   );
 
   return (
-    <ScrollView className="flex-1 bg-gray-50 dark:bg-gray-950" contentContainerClassName="p-4 pt-16">
+    <ScrollView className="flex-1 bg-surface-page dark:bg-surface-page-dark" contentContainerClassName="p-4 pt-16">
       <View className="mb-6 flex-row items-start justify-between">
         <View className="flex-1 pr-3">
-          <Text className="mb-1 text-2xl font-bold text-gray-900 dark:text-gray-50">Fichas técnicas</Text>
-          <Text className="text-base text-gray-500 dark:text-gray-400">O caderno digital de receitas do seu estabelecimento</Text>
+          <Text className="mb-1 font-display text-4xl text-ink dark:text-ink-dark">Fichas técnicas</Text>
+          <Text className="text-base text-ink-secondary dark:text-ink-secondary-dark">O caderno digital de receitas do seu estabelecimento</Text>
         </View>
         <Link href="/profile" asChild>
           <Pressable accessibilityRole="button" accessibilityLabel="Perfil" hitSlop={8} className="min-h-[44px] min-w-[44px] items-end justify-center">
-            <Text className="text-sm font-medium text-blue-600">Perfil</Text>
+            <Text className="text-sm font-archivo-medium text-brand dark:text-brand-dark">Perfil</Text>
           </Pressable>
         </Link>
       </View>
 
       <View className="flex-row gap-3">
         {canAccessRecipeType(role, 'bar') ? (
-          <ModuleCard icon="🍸" title="Bar" subtitle="Drinks" onPress={() => router.push('/recipes/bar')} />
+          <ModuleCard icon={Martini} title="Bar" subtitle="Drinks" onPress={() => router.push('/recipes/bar')} />
         ) : null}
         {canAccessRecipeType(role, 'cozinha') ? (
           <ModuleCard
-            icon="👨‍🍳"
+            icon={ChefHat}
             title="Cozinha"
             subtitle="Pratos"
             onPress={() => router.push('/recipes/cozinha')}
@@ -60,26 +61,26 @@ export default function HomeScreen() {
 
       <View className="mt-3 flex-row gap-3">
         <ModuleCard
-          icon="📖"
+          icon={BookOpen}
           title="Gerar Booking"
           subtitle="Booking para impressão"
           onPress={() => router.push('/booking')}
         />
         {canManageBusiness(role) ? (
-          <ModuleCard icon="📦" title="Estoque" subtitle="Insumos" onPress={() => router.push('/inventory')} />
+          <ModuleCard icon={Package} title="Estoque" subtitle="Insumos" onPress={() => router.push('/inventory')} />
         ) : null}
       </View>
 
       {canManageBusiness(role) ? (
         <View className="mt-3 flex-row gap-3">
-          <ModuleCard icon="👥" title="Equipe" subtitle="Convites" onPress={() => router.push('/team')} />
+          <ModuleCard icon={Users} title="Equipe" subtitle="Convites" onPress={() => router.push('/team')} />
           <View className="flex-1" />
         </View>
       ) : null}
 
-      <Text className="mb-3 mt-8 text-sm font-semibold text-gray-500 dark:text-gray-400">Últimas fichas editadas</Text>
+      <Text className="mb-3 mt-8 text-sm font-archivo-semibold text-ink-secondary dark:text-ink-secondary-dark">Últimas fichas editadas</Text>
       {recent.length === 0 ? (
-        <Text className="text-sm text-gray-500 dark:text-gray-400">Nenhuma ficha editada ainda</Text>
+        <Text className="text-sm text-ink-secondary dark:text-ink-secondary-dark">Nenhuma ficha editada ainda</Text>
       ) : (
         recent.map((recipe) => (
           <Link key={recipe.id} href={`/recipes/${recipe.type}/${recipe.id}`} asChild>

@@ -65,20 +65,20 @@ export default function ProfileScreen() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-white dark:bg-gray-900" contentContainerClassName="px-6 py-16">
+    <ScrollView className="flex-1 bg-surface-card dark:bg-surface-card-dark" contentContainerClassName="px-6 py-16">
       <BackButton />
-      <Text className="mb-6 text-2xl font-bold text-gray-900 dark:text-gray-50">Perfil</Text>
+      <Text className="mb-6 text-2xl font-archivo-bold text-ink dark:text-ink-dark">Perfil</Text>
 
-      <View className="mb-8 rounded-2xl border border-gray-200 dark:border-gray-700 p-4">
-        <Text className="text-sm text-gray-500 dark:text-gray-400">Nome</Text>
-        <Text className="mb-3 text-base text-gray-900 dark:text-gray-50">{profile?.name || '—'}</Text>
-        <Text className="text-sm text-gray-500 dark:text-gray-400">Email</Text>
-        <Text className="mb-3 text-base text-gray-900 dark:text-gray-50">{profile?.email || '—'}</Text>
-        <Text className="text-sm text-gray-500 dark:text-gray-400">Estabelecimento</Text>
-        <Text className="text-base text-gray-900 dark:text-gray-50">{companyName || '—'}</Text>
+      <View className="mb-8 rounded-2xl border border-surface-border dark:border-surface-border-dark p-4">
+        <Text className="text-sm text-ink-secondary dark:text-ink-secondary-dark">Nome</Text>
+        <Text className="mb-3 text-base text-ink dark:text-ink-dark">{profile?.name || '—'}</Text>
+        <Text className="text-sm text-ink-secondary dark:text-ink-secondary-dark">Email</Text>
+        <Text className="mb-3 text-base text-ink dark:text-ink-dark">{profile?.email || '—'}</Text>
+        <Text className="text-sm text-ink-secondary dark:text-ink-secondary-dark">Estabelecimento</Text>
+        <Text className="text-base text-ink dark:text-ink-dark">{companyName || '—'}</Text>
       </View>
 
-      <Text className="mb-3 text-base font-semibold text-gray-900 dark:text-gray-50">Aparência</Text>
+      <Text className="mb-3 text-base font-archivo-semibold text-ink dark:text-ink-dark">Aparência</Text>
       <View className="mb-8 flex-row gap-2">
         {THEME_OPTIONS.map((option) => {
           const selected = themePreference === option.value;
@@ -91,12 +91,12 @@ export default function ProfileScreen() {
               onPress={() => setThemePreference(option.value)}
               className={
                 'min-h-[44px] flex-1 items-center justify-center rounded-full border px-3 py-2 ' +
-                (selected ? 'border-blue-600 bg-blue-600' : 'border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900')
+                (selected ? 'border-brand dark:border-brand-dark bg-brand dark:bg-brand-dark' : 'border-surface-input-border dark:border-surface-border-dark bg-surface-card dark:bg-surface-card-dark')
               }
             >
               <Text
                 className={
-                  selected ? 'text-sm font-semibold text-white' : 'text-sm text-gray-700 dark:text-gray-300'
+                  selected ? 'text-sm font-archivo-semibold text-white' : 'text-sm text-ink dark:text-ink-dark'
                 }
               >
                 {option.label}
@@ -106,15 +106,15 @@ export default function ProfileScreen() {
         })}
       </View>
 
-      <Text className="mb-3 text-base font-semibold text-gray-900 dark:text-gray-50">Privacidade</Text>
+      <Text className="mb-3 text-base font-archivo-semibold text-ink dark:text-ink-dark">Privacidade</Text>
       <View className="mb-8 gap-1">
         <Link href="/terms" asChild>
-          <Text accessibilityRole="link" className="min-h-[44px] py-2 text-base text-blue-600">
+          <Text accessibilityRole="link" className="min-h-[44px] py-2 text-base text-brand dark:text-brand-dark">
             Termos de Uso
           </Text>
         </Link>
         <Link href="/privacy" asChild>
-          <Text accessibilityRole="link" className="min-h-[44px] py-2 text-base text-blue-600">
+          <Text accessibilityRole="link" className="min-h-[44px] py-2 text-base text-brand dark:text-brand-dark">
             Política de Privacidade
           </Text>
         </Link>

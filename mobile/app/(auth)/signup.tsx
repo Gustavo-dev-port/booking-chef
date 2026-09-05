@@ -42,9 +42,9 @@ export default function SignupScreen() {
   };
 
   return (
-    <KeyboardAvoidingScreen className="flex-1 bg-white dark:bg-gray-900" contentContainerClassName="flex-grow justify-center px-6 py-12">
+    <KeyboardAvoidingScreen className="flex-1 bg-surface-card dark:bg-surface-card-dark" contentContainerClassName="flex-grow justify-center px-6 py-12">
       <BackButton />
-      <Text className="mb-8 text-2xl font-bold text-gray-900 dark:text-gray-50">Criar conta</Text>
+      <Text className="mb-8 text-2xl font-archivo-bold text-ink dark:text-ink-dark">Criar conta</Text>
 
       <FormField
         control={control}
@@ -72,7 +72,7 @@ export default function SignupScreen() {
         autoComplete="new-password"
       />
 
-      {formError ? <Text className="mb-4 text-sm text-red-600">{formError}</Text> : null}
+      {formError ? <Text className="mb-4 text-sm text-danger dark:text-danger-dark">{formError}</Text> : null}
 
       <PrimaryButton label="Criar conta" onPress={handleSubmit(onSubmit)} loading={isSubmitting} />
     </KeyboardAvoidingScreen>

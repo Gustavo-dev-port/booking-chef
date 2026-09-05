@@ -49,9 +49,9 @@ export default function AcceptInviteScreen() {
   };
 
   return (
-    <KeyboardAvoidingScreen className="flex-1 bg-white dark:bg-gray-900" contentContainerClassName="flex-grow justify-center px-6 py-12">
-      <Text className="mb-3 text-2xl font-bold text-gray-900 dark:text-gray-50">Você foi convidado!</Text>
-      <Text className="mb-6 text-base text-gray-500 dark:text-gray-400">
+    <KeyboardAvoidingScreen className="flex-1 bg-surface-card dark:bg-surface-card-dark" contentContainerClassName="flex-grow justify-center px-6 py-12">
+      <Text className="mb-3 text-2xl font-archivo-bold text-ink dark:text-ink-dark">Você foi convidado!</Text>
+      <Text className="mb-6 text-base text-ink-secondary dark:text-ink-secondary-dark">
         Crie uma senha para acessar o Booking Chef do estabelecimento que te convidou.
       </Text>
 
@@ -74,7 +74,7 @@ export default function AcceptInviteScreen() {
       />
       <FormCheckbox control={control} name="termsAccepted" label="Li e aceito os Termos de Uso" />
 
-      {formError ? <Text className="mb-4 text-sm text-red-600">{formError}</Text> : null}
+      {formError ? <Text className="mb-4 text-sm text-danger dark:text-danger-dark">{formError}</Text> : null}
 
       <PrimaryButton label="Ativar acesso" onPress={handleSubmit(onSubmit)} loading={isSubmitting} />
     </KeyboardAvoidingScreen>

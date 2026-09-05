@@ -115,10 +115,10 @@ export default function BookingScreen() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-white dark:bg-gray-900" contentContainerClassName="flex-grow justify-center px-6 py-12">
+    <ScrollView className="flex-1 bg-surface-card dark:bg-surface-card-dark" contentContainerClassName="flex-grow justify-center px-6 py-12">
       <BackButton />
-      <Text className="mb-1 text-2xl font-bold text-gray-900 dark:text-gray-50">Gerar Booking</Text>
-      <Text className="mb-8 text-base text-gray-500 dark:text-gray-400">
+      <Text className="mb-1 text-2xl font-archivo-bold text-ink dark:text-ink-dark">Gerar Booking</Text>
+      <Text className="mb-8 text-base text-ink-secondary dark:text-ink-secondary-dark">
         Um PDF com capa, sumário e uma ficha por página — pronto pra imprimir.
       </Text>
 
@@ -133,24 +133,24 @@ export default function BookingScreen() {
               onPress={() => setSelection(option.value)}
               className={
                 'min-h-[44px] flex-row items-center gap-3 rounded-xl border px-4 py-3 ' +
-                (selected ? 'border-blue-600 bg-blue-50 dark:bg-blue-950' : 'border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900')
+                (selected ? 'border-brand dark:border-brand-dark bg-warning-bg dark:bg-surface-border-dark' : 'border-surface-input-border dark:border-surface-border-dark bg-surface-card dark:bg-surface-card-dark')
               }
             >
               <View
                 className={
                   'h-5 w-5 items-center justify-center rounded-full border-2 ' +
-                  (selected ? 'border-blue-600' : 'border-gray-400 dark:border-gray-500')
+                  (selected ? 'border-brand dark:border-brand-dark' : 'border-surface-input-border dark:border-surface-border-dark')
                 }
               >
-                {selected ? <View className="h-2.5 w-2.5 rounded-full bg-blue-600" /> : null}
+                {selected ? <View className="h-2.5 w-2.5 rounded-full bg-brand dark:bg-brand-dark" /> : null}
               </View>
-              <Text className="text-base text-gray-900 dark:text-gray-50">{option.label}</Text>
+              <Text className="text-base text-ink dark:text-ink-dark">{option.label}</Text>
             </Pressable>
           );
         })}
       </View>
 
-      {error ? <Text className="mb-4 text-sm text-red-600">{error}</Text> : null}
+      {error ? <Text className="mb-4 text-sm text-danger dark:text-danger-dark">{error}</Text> : null}
 
       <PrimaryButton label="Gerar PDF" onPress={handleGenerate} loading={generating} />
     </ScrollView>

@@ -35,8 +35,8 @@ export default function LoginScreen() {
   };
 
   return (
-    <KeyboardAvoidingScreen className="flex-1 bg-white dark:bg-gray-900" contentContainerClassName="flex-grow justify-center px-6 py-12">
-      <Text className="mb-8 text-2xl font-bold text-gray-900 dark:text-gray-50">Entrar</Text>
+    <KeyboardAvoidingScreen className="flex-1 bg-surface-card dark:bg-surface-card-dark" contentContainerClassName="flex-grow justify-center px-6 py-12">
+      <Text className="mb-8 text-2xl font-archivo-bold text-ink dark:text-ink-dark">Entrar</Text>
 
       <FormField
         control={control}
@@ -55,7 +55,7 @@ export default function LoginScreen() {
         autoComplete="current-password"
       />
 
-      {formError ? <Text className="mb-4 text-sm text-red-600">{formError}</Text> : null}
+      {formError ? <Text className="mb-4 text-sm text-danger dark:text-danger-dark">{formError}</Text> : null}
 
       <View className="mb-3">
         <PrimaryButton label="Entrar" onPress={handleSubmit(onSubmit)} loading={isSubmitting} />
@@ -64,7 +64,7 @@ export default function LoginScreen() {
       <Link href="/forgot-password" asChild>
         <Text
           accessibilityRole="link"
-          className="mb-3 min-h-[44px] py-3 text-center text-sm text-blue-600"
+          className="mb-3 min-h-[44px] py-3 text-center text-sm text-brand dark:text-brand-dark"
         >
           Esqueci minha senha
         </Text>

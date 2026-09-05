@@ -44,16 +44,16 @@ export default function ResetPasswordScreen() {
 
   if (done) {
     return (
-      <ScrollView className="flex-1 bg-white dark:bg-gray-900" contentContainerClassName="flex-grow justify-center px-6">
-        <Text className="text-2xl font-bold text-gray-900 dark:text-gray-50">Senha atualizada!</Text>
+      <ScrollView className="flex-1 bg-surface-card dark:bg-surface-card-dark" contentContainerClassName="flex-grow justify-center px-6">
+        <Text className="text-2xl font-archivo-bold text-ink dark:text-ink-dark">Senha atualizada!</Text>
       </ScrollView>
     );
   }
 
   return (
-    <KeyboardAvoidingScreen className="flex-1 bg-white dark:bg-gray-900" contentContainerClassName="flex-grow justify-center px-6 py-12">
-      <Text className="mb-3 text-2xl font-bold text-gray-900 dark:text-gray-50">Nova senha</Text>
-      <Text className="mb-6 text-base text-gray-500 dark:text-gray-400">Escolha uma nova senha para sua conta.</Text>
+    <KeyboardAvoidingScreen className="flex-1 bg-surface-card dark:bg-surface-card-dark" contentContainerClassName="flex-grow justify-center px-6 py-12">
+      <Text className="mb-3 text-2xl font-archivo-bold text-ink dark:text-ink-dark">Nova senha</Text>
+      <Text className="mb-6 text-base text-ink-secondary dark:text-ink-secondary-dark">Escolha uma nova senha para sua conta.</Text>
 
       <FormField
         control={control}
@@ -73,7 +73,7 @@ export default function ResetPasswordScreen() {
         autoComplete="new-password"
       />
 
-      {formError ? <Text className="mb-4 text-sm text-red-600">{formError}</Text> : null}
+      {formError ? <Text className="mb-4 text-sm text-danger dark:text-danger-dark">{formError}</Text> : null}
 
       <PrimaryButton label="Salvar nova senha" onPress={handleSubmit(onSubmit)} loading={isSubmitting} />
     </KeyboardAvoidingScreen>

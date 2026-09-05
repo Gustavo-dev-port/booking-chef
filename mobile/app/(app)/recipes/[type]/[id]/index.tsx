@@ -23,7 +23,7 @@ import {
   setRecipePhoto,
   updateRecipe,
 } from '../../../../../src/features/recipes/api';
-import { calculateCmv } from '../../../../../src/features/recipes/cmv';
+import { calculateCmv, computeCmvStatus, cmvStatusLabel, CMV_STATUS_CLASSES } from '../../../../../src/features/recipes/cmv';
 import { saveCostSnapshot } from '../../../../../src/features/recipes/costSnapshot';
 import { suggestPrices } from '../../../../../src/features/recipes/pricing';
 import { pickPhoto, removeRecipePhoto, takePhoto, uploadRecipePhoto, type PickedPhoto } from '../../../../../src/features/recipes/photos';
@@ -263,35 +263,35 @@ export default function RecipeEditorScreen() {
 
   if (loading) {
     return (
-      <View className="flex-1 items-center justify-center bg-white dark:bg-gray-900">
-        <Text className="text-base text-gray-500 dark:text-gray-400">Carregando…</Text>
+      <View className="flex-1 items-center justify-center bg-surface-card dark:bg-surface-card-dark">
+        <Text className="text-base text-ink-secondary dark:text-ink-secondary-dark">Carregando…</Text>
       </View>
     );
   }
 
   return (
-    <KeyboardAvoidingScreen className="flex-1 bg-white dark:bg-gray-900" contentContainerClassName="px-6 py-16">
+    <KeyboardAvoidingScreen className="flex-1 bg-surface-card dark:bg-surface-card-dark" contentContainerClassName="px-6 py-16">
       <BackButton />
-      <Text className="mb-6 text-2xl font-bold text-gray-900 dark:text-gray-50">
+      <Text className="mb-6 text-2xl font-archivo-bold text-ink dark:text-ink-dark">
         {isNew ? 'Nova ficha' : 'Editar ficha'}
       </Text>
 
       <FormField control={control} name="name" label="Nome" />
 
-      <Text className="mb-3 mt-2 text-base font-semibold text-gray-900 dark:text-gray-50">Ingredientes</Text>
+      <Text className="mb-3 mt-2 text-base font-archivo-semibold text-ink dark:text-ink-dark">Ingredientes</Text>
       {fields.map((field, index) => {
         const rowIngredientId = watchedIngredients?.[index]?.ingredientId;
         const linkedItem = rowIngredientId ? catalogItems.find((c) => c.id === rowIngredientId) : undefined;
 
         return (
-          <View key={field.id} className="mb-2 gap-2 rounded-xl border border-gray-100 dark:border-gray-800 p-2">
+          <View key={field.id} className="mb-2 gap-2 rounded-xl border border-surface-border dark:border-surface-border-dark p-2">
             {linkedItem ? (
               <View className="flex-row items-center justify-between">
                 <View className="flex-1 pr-2">
-                  <Text className="text-base font-medium text-gray-900 dark:text-gray-50" numberOfLines={1}>
+                  <Text className="text-base font-archivo-medium text-ink dark:text-ink-dark" numberOfLines={1}>
                     {linkedItem.name}
                   </Text>
-                  <Text className="text-xs text-gray-500 dark:text-gray-400">
+                  <Text className="text-xs text-ink-secondary dark:text-ink-secondary-dark">
                     R$ {(linkedItem.unit_cost ?? 0).toFixed(2)}/{ingredientUnitLabel(linkedItem.usage_unit)}
                     {linkedItem.category_id && categoryNameById.get(linkedItem.category_id)
                       ? ` · ${categoryNameById.get(linkedItem.category_id)}`
@@ -304,7 +304,7 @@ export default function RecipeEditorScreen() {
                   onPress={() => setValue(`ingredients.${index}.ingredientId`, '')}
                   className="h-11 w-11 items-center justify-center"
                 >
-                  <Text className="text-lg text-gray-500 dark:text-gray-400">✕</Text>
+                  <Text className="text-lg text-ink-secondary dark:text-ink-secondary-dark">✕</Text>
                 </Pressable>
               </View>
             ) : (
@@ -340,9 +340,9 @@ export default function RecipeEditorScreen() {
               <View className="flex-1">
                 {linkedItem ? (
                   <View>
-                    <Text className="mb-1 text-base text-gray-700 dark:text-gray-300">Un.</Text>
-                    <View className="min-h-[44px] items-center justify-center rounded-xl border border-gray-200 dark:border-gray-800 px-3">
-                      <Text className="text-base text-gray-500 dark:text-gray-400">
+                    <Text className="mb-1 text-base text-ink dark:text-ink-dark">Un.</Text>
+                    <View className="min-h-[44px] items-center justify-center rounded-xl border border-surface-border dark:border-surface-border-dark px-3">
+                      <Text className="text-base text-ink-secondary dark:text-ink-secondary-dark">
                         {ingredientUnitLabel(linkedItem.usage_unit)}
                       </Text>
                     </View>
@@ -358,7 +358,7 @@ export default function RecipeEditorScreen() {
                 disabled={!canWrite}
                 className={'mt-9 h-11 w-11 items-center justify-center' + (canWrite ? '' : ' opacity-0')}
               >
-                <Text className="text-lg text-red-600">✕</Text>
+                <Text className="text-lg text-danger dark:text-danger-dark">✕</Text>
               </Pressable>
             </View>
           </View>
@@ -388,60 +388,75 @@ export default function RecipeEditorScreen() {
         keyboardType="decimal-pad"
       />
 
-      <View className="mb-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-950 p-3">
+      <View className="mb-4 rounded-xl border border-surface-border dark:border-surface-border-dark bg-surface-page dark:bg-surface-page-dark p-3">
         <View className="flex-row justify-between">
-          <Text className="text-sm text-gray-500 dark:text-gray-400">Custo total</Text>
-          <Text className="text-base font-semibold text-gray-900 dark:text-gray-50">
+          <Text className="text-sm text-ink-secondary dark:text-ink-secondary-dark">Custo total</Text>
+          <Text className="font-archivo-semibold text-base text-ink dark:text-ink-dark">
             R$ {cmv.totalCost.toFixed(2)}
           </Text>
         </View>
         {cmv.cmvPercentage !== null ? (
           <>
-            <View className="mt-1 flex-row justify-between">
-              <Text className="text-sm text-gray-500 dark:text-gray-400">CMV</Text>
-              <Text className="text-base font-semibold text-gray-900 dark:text-gray-50">
-                {cmv.cmvPercentage.toFixed(1)}%
-              </Text>
+            {/* Indicador de CMV (Design System v1, "05 · Componentes") — o
+                número-herói vai em serifado grande: "é o dado que faz o
+                dono abrir o app". Meta fixa em 30% (ver cmv.ts,
+                computeCmvStatus) — o app ainda não tem meta configurável
+                por empresa. */}
+            <View className="mt-3">
+              <View className="flex-row items-baseline justify-between">
+                <Text className={`font-display text-3xl ${CMV_STATUS_CLASSES[computeCmvStatus(cmv.cmvPercentage)].text}`}>
+                  {cmv.cmvPercentage.toFixed(1)}%
+                </Text>
+                <Text className={`font-archivo-bold text-xs ${CMV_STATUS_CLASSES[computeCmvStatus(cmv.cmvPercentage)].text}`}>
+                  {cmvStatusLabel(computeCmvStatus(cmv.cmvPercentage), cmv.cmvPercentage)}
+                </Text>
+              </View>
+              <View className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-alt dark:bg-surface-border-dark">
+                <View
+                  className={`h-1.5 rounded-full ${CMV_STATUS_CLASSES[computeCmvStatus(cmv.cmvPercentage)].bar}`}
+                  style={{ width: `${Math.min(100, (cmv.cmvPercentage / 60) * 100)}%` }}
+                />
+              </View>
             </View>
-            <View className="mt-1 flex-row justify-between">
-              <Text className="text-sm text-gray-500 dark:text-gray-400">Margem bruta</Text>
-              <Text className="text-base font-semibold text-gray-900 dark:text-gray-50">
+            <View className="mt-3 flex-row justify-between">
+              <Text className="text-sm text-ink-secondary dark:text-ink-secondary-dark">Margem bruta</Text>
+              <Text className="font-archivo-semibold text-base text-ink dark:text-ink-dark">
                 R$ {(cmv.grossMargin ?? 0).toFixed(2)}
               </Text>
             </View>
           </>
         ) : (
-          <Text className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+          <Text className="mt-1 text-xs text-ink-secondary dark:text-ink-secondary-dark">
             Informe o preço de venda pra ver o CMV%.
           </Text>
         )}
         {cmv.hasUnknownCost ? (
-          <Text className="mt-1 text-xs text-amber-700 dark:text-amber-400">
+          <Text className="mt-1 text-xs text-warning dark:text-warning-dark">
             Algum ingrediente ainda não está vinculado ao estoque — o custo total pode estar incompleto.
           </Text>
         ) : null}
         {!isNew ? (
           <Link href={`/recipes/${type}/${params.id}/cost-history`} asChild>
             <Pressable accessibilityRole="button" className="mt-2 min-h-[32px] justify-center">
-              <Text className="text-sm font-medium text-blue-600">Ver histórico de custo</Text>
+              <Text className="text-sm font-archivo-medium text-brand dark:text-brand-dark">Ver histórico de custo</Text>
             </Pressable>
           </Link>
         ) : null}
       </View>
 
       {cmv.totalCost > 0 ? (
-        <View className="mb-4 rounded-xl border border-gray-200 dark:border-gray-700 p-3">
-          <Text className="mb-2 text-base font-semibold text-gray-900 dark:text-gray-50">
+        <View className="mb-4 rounded-xl border border-surface-border dark:border-surface-border-dark p-3">
+          <Text className="mb-2 text-base font-archivo-semibold text-ink dark:text-ink-dark">
             Calculadora de preço sugerido
           </Text>
           <View className="mb-3 flex-row items-center gap-2">
-            <Text className="text-sm text-gray-700 dark:text-gray-300">CMV desejado (%)</Text>
+            <Text className="text-sm text-ink dark:text-ink-dark">CMV desejado (%)</Text>
             <TextInput
               accessibilityLabel="CMV desejado"
               keyboardType="decimal-pad"
               value={desiredCmv}
               onChangeText={setDesiredCmv}
-              className="min-h-[36px] w-16 rounded-lg border border-gray-300 dark:border-gray-700 px-2 text-center text-base text-gray-900 dark:text-gray-50"
+              className="min-h-[36px] w-16 rounded-lg border border-surface-input-border dark:border-surface-border-dark px-2 text-center text-base text-ink dark:text-ink-dark"
             />
           </View>
 
@@ -453,18 +468,18 @@ export default function RecipeEditorScreen() {
                 { key: 'premium', label: 'Premium', value: suggested.premium },
               ] as const
             ).map((tier) => (
-              <View key={tier.key} className="flex-1 items-center rounded-xl border border-gray-200 dark:border-gray-800 p-2">
-                <Text className="text-xs text-gray-500 dark:text-gray-400">{tier.label}</Text>
-                <Text className="mb-2 text-base font-semibold text-gray-900 dark:text-gray-50">
+              <View key={tier.key} className="flex-1 items-center rounded-xl border border-surface-border dark:border-surface-border-dark p-2">
+                <Text className="text-xs text-ink-secondary dark:text-ink-secondary-dark">{tier.label}</Text>
+                <Text className="mb-2 text-base font-archivo-semibold text-ink dark:text-ink-dark">
                   R$ {tier.value.toFixed(2)}
                 </Text>
                 <Pressable
                   accessibilityRole="button"
                   accessibilityLabel={`Usar preço ${tier.label}`}
                   onPress={() => setValue('salePrice', tier.value)}
-                  className="min-h-[32px] items-center justify-center rounded-lg bg-blue-600 px-2"
+                  className="min-h-[32px] items-center justify-center rounded-lg bg-brand dark:bg-brand-dark px-2"
                 >
-                  <Text className="text-xs font-semibold text-white">Usar este preço</Text>
+                  <Text className="text-xs font-archivo-semibold text-white">Usar este preço</Text>
                 </Pressable>
               </View>
             ))}
@@ -493,7 +508,7 @@ export default function RecipeEditorScreen() {
         multiline
         numberOfLines={4}
         textAlignVertical="top"
-        className="min-h-[100px] rounded-xl border border-gray-300 dark:border-gray-700 px-4 py-3 text-base text-gray-900 dark:text-gray-50"
+        className="min-h-[100px] rounded-xl border border-surface-input-border dark:border-surface-border-dark px-4 py-3 text-base text-ink dark:text-ink-dark"
       />
       <FormField
         control={control}
@@ -502,21 +517,21 @@ export default function RecipeEditorScreen() {
         multiline
         numberOfLines={3}
         textAlignVertical="top"
-        className="min-h-[80px] rounded-xl border border-gray-300 dark:border-gray-700 px-4 py-3 text-base text-gray-900 dark:text-gray-50"
+        className="min-h-[80px] rounded-xl border border-surface-input-border dark:border-surface-border-dark px-4 py-3 text-base text-ink dark:text-ink-dark"
       />
 
-      <Text className="mb-3 mt-2 text-base font-semibold text-gray-900 dark:text-gray-50">Foto (opcional)</Text>
+      <Text className="mb-3 mt-2 text-base font-archivo-semibold text-ink dark:text-ink-dark">Foto (opcional)</Text>
       <View className="relative mb-4">
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Escolher foto"
           onPress={handlePickPhoto}
-          className="h-40 items-center justify-center overflow-hidden rounded-2xl border border-dashed border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-950"
+          className="h-40 items-center justify-center overflow-hidden rounded-2xl border border-dashed border-surface-input-border dark:border-surface-border-dark bg-surface-page dark:bg-surface-page-dark"
         >
           {displayedPhotoUri ? (
             <Image source={{ uri: displayedPhotoUri }} className="h-full w-full" resizeMode="cover" />
           ) : (
-            <Text className="text-sm text-gray-500 dark:text-gray-400">Toque para tirar ou escolher uma foto</Text>
+            <Text className="text-sm text-ink-secondary dark:text-ink-secondary-dark">Toque para tirar ou escolher uma foto</Text>
           )}
         </Pressable>
         {displayedPhotoUri ? (
@@ -531,7 +546,7 @@ export default function RecipeEditorScreen() {
         ) : null}
       </View>
 
-      {formError ? <Text className="mb-4 text-sm text-red-600">{formError}</Text> : null}
+      {formError ? <Text className="mb-4 text-sm text-danger dark:text-danger-dark">{formError}</Text> : null}
 
       {canWrite ? (
         <>

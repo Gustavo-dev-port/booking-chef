@@ -33,10 +33,10 @@ export default function ForgotPasswordScreen() {
 
   if (sent) {
     return (
-      <ScrollView className="flex-1 bg-white dark:bg-gray-900" contentContainerClassName="flex-grow justify-center px-6">
+      <ScrollView className="flex-1 bg-surface-card dark:bg-surface-card-dark" contentContainerClassName="flex-grow justify-center px-6">
         <BackButton />
-        <Text className="mb-3 text-2xl font-bold text-gray-900 dark:text-gray-50">Email enviado</Text>
-        <Text className="text-base text-gray-500 dark:text-gray-400">
+        <Text className="mb-3 text-2xl font-archivo-bold text-ink dark:text-ink-dark">Email enviado</Text>
+        <Text className="text-base text-ink-secondary dark:text-ink-secondary-dark">
           Se existir uma conta com esse email, você vai receber um link para criar uma nova senha.
         </Text>
       </ScrollView>
@@ -44,10 +44,10 @@ export default function ForgotPasswordScreen() {
   }
 
   return (
-    <KeyboardAvoidingScreen className="flex-1 bg-white dark:bg-gray-900" contentContainerClassName="flex-grow justify-center px-6 py-12">
+    <KeyboardAvoidingScreen className="flex-1 bg-surface-card dark:bg-surface-card-dark" contentContainerClassName="flex-grow justify-center px-6 py-12">
       <BackButton />
-      <Text className="mb-3 text-2xl font-bold text-gray-900 dark:text-gray-50">Esqueci minha senha</Text>
-      <Text className="mb-6 text-base text-gray-500 dark:text-gray-400">
+      <Text className="mb-3 text-2xl font-archivo-bold text-ink dark:text-ink-dark">Esqueci minha senha</Text>
+      <Text className="mb-6 text-base text-ink-secondary dark:text-ink-secondary-dark">
         Informe o email da sua conta. Vamos enviar um link para você criar uma nova senha.
       </Text>
 
@@ -60,7 +60,7 @@ export default function ForgotPasswordScreen() {
         keyboardType="email-address"
       />
 
-      {formError ? <Text className="mb-4 text-sm text-red-600">{formError}</Text> : null}
+      {formError ? <Text className="mb-4 text-sm text-danger dark:text-danger-dark">{formError}</Text> : null}
 
       <PrimaryButton label="Enviar link" onPress={handleSubmit(onSubmit)} loading={isSubmitting} />
     </KeyboardAvoidingScreen>
