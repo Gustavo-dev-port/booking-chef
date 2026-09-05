@@ -124,12 +124,6 @@ export default function ProfileScreen() {
         <PrimaryButton label="Sair" variant="outline" onPress={() => signOut()} />
       </View>
 
-      <Text className="mb-2 text-sm font-semibold uppercase tracking-wide text-red-600">
-        Zona de risco
-      </Text>
-      <Text className="mb-3 text-sm text-gray-500 dark:text-gray-400">
-        Exclui sua conta, seu estabelecimento e todas as fichas técnicas de forma permanente.
-      </Text>
       <PrimaryButton
         label="Excluir minha conta"
         variant="outline"

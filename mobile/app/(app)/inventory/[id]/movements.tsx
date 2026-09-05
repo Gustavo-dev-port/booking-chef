@@ -35,6 +35,10 @@ export default function InventoryMovementsScreen() {
   const [reason, setReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  // Quando compra e uso são unidades diferentes (ex. garrafa de 750 mL),
+  // deixa lançar contando garrafas — converte pra usage_unit por baixo
+  // dos panos (é a unidade que current_quantity sempre guarda).
+  const [inputMode, setInputMode] = useState<'usage' | 'purchase'>('purchase');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -63,10 +67,16 @@ export default function InventoryMovementsScreen() {
       setFormError('Informe uma quantidade válida.');
       return;
     }
+    // current_quantity é sempre guardado em usage_unit — se o usuário
+    // lançou contando em unidade de compra (ex. "2 garrafas"), converte
+    // multiplicando pelo conteúdo do pacote (ex. 750 mL/garrafa) antes de
+    // mandar pro banco.
+    const quantityInUsageUnit =
+      inputMode === 'purchase' && item ? parsedQuantity * item.package_content : parsedQuantity;
 
     setSubmitting(true);
     try {
-      await registerMovement(params.id, type, parsedQuantity, reason.trim() || undefined);
+      await registerMovement(params.id, type, quantityInUsageUnit, reason.trim() || undefined);
       setQuantity('');
       setReason('');
       await load();
@@ -78,6 +88,9 @@ export default function InventoryMovementsScreen() {
   };
 
   const unitLabel = item ? ingredientUnitLabel(item.usage_unit) : '';
+  const purchaseUnitLabel = item ? ingredientUnitLabel(item.purchase_unit) : '';
+  const hasPackaging = !!item && (item.purchase_unit !== item.usage_unit || item.package_content !== 1);
+  const activeUnitLabel = hasPackaging && inputMode === 'purchase' ? purchaseUnitLabel : unitLabel;
 
   return (
     <View className="flex-1 bg-gray-50 dark:bg-gray-950 pt-16">
@@ -113,8 +126,41 @@ export default function InventoryMovementsScreen() {
           })}
         </View>
 
+        {hasPackaging ? (
+          <View className="mb-3 flex-row gap-2">
+            <Pressable
+              accessibilityRole="radio"
+              accessibilityLabel={`Contar em ${purchaseUnitLabel}`}
+              accessibilityState={{ selected: inputMode === 'purchase' }}
+              onPress={() => setInputMode('purchase')}
+              className={
+                'min-h-[44px] flex-1 items-center justify-center rounded-full border px-3 py-2 ' +
+                (inputMode === 'purchase' ? 'border-blue-600 bg-blue-600' : 'border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900')
+              }
+            >
+              <Text className={inputMode === 'purchase' ? 'text-sm font-semibold text-white' : 'text-sm text-gray-700 dark:text-gray-300'}>
+                Em {purchaseUnitLabel} (compra)
+              </Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="radio"
+              accessibilityLabel={`Contar em ${unitLabel}`}
+              accessibilityState={{ selected: inputMode === 'usage' }}
+              onPress={() => setInputMode('usage')}
+              className={
+                'min-h-[44px] flex-1 items-center justify-center rounded-full border px-3 py-2 ' +
+                (inputMode === 'usage' ? 'border-blue-600 bg-blue-600' : 'border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900')
+              }
+            >
+              <Text className={inputMode === 'usage' ? 'text-sm font-semibold text-white' : 'text-sm text-gray-700 dark:text-gray-300'}>
+                Em {unitLabel} (uso)
+              </Text>
+            </Pressable>
+          </View>
+        ) : null}
+
         <Text className="mb-1 text-base text-gray-700 dark:text-gray-300">
-          {type === 'ajuste' ? `Novo saldo contado (${unitLabel})` : `Quantidade (${unitLabel})`}
+          {type === 'ajuste' ? `Novo saldo contado (${activeUnitLabel})` : `Quantidade (${activeUnitLabel})`}
         </Text>
         <TextInput
           accessibilityLabel="Quantidade"

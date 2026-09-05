@@ -25,12 +25,12 @@ const ITEM_COLUMNS =
 /**
  * Estoque (V2, Épico 06) estende `ingredients` em vez de nascer como
  * tabela paralela — decisão de arquitetura em docs/07_DATABASE.md,
- * confirmada com o usuário. O formulário do app é mais simples que o
- * schema real (um "unidade" só, um "preço" só — ver
- * src/validators/inventory.ts); aqui a tradução: purchase_unit =
- * usage_unit = unit, package_content = 1, package_price = pricePerUnit —
- * o que faz `unit_cost` (coluna gerada) virar exatamente o preço por
- * unidade digitado.
+ * confirmada com o usuário. Quantidade de compra e volume de uso são
+ * campos distintos (purchase_unit/package_content/package_price vs.
+ * usage_unit) — ver comentário em src/validators/inventory.ts.
+ * `current_quantity`/`minimum_quantity` (e as movimentações, ver
+ * movements.ts) ficam sempre em usage_unit — é a unidade que a receita
+ * consome e que o CMV usa pra custo.
  */
 export async function listInventoryItems(companyId: string): Promise<InventoryItem[]> {
   const { data, error } = await supabase
@@ -53,10 +53,10 @@ function toIngredientRow(input: InventoryItemInput) {
   return {
     name: input.name,
     category_id: input.categoryId || null,
-    purchase_unit: input.unit,
-    usage_unit: input.unit,
-    package_content: 1,
-    package_price: input.pricePerUnit,
+    purchase_unit: input.purchaseUnit,
+    usage_unit: input.usageUnit,
+    package_content: input.packageContent,
+    package_price: input.packagePrice,
     minimum_quantity: input.minimumQuantity,
     supplier_id: input.supplierId || null,
     internal_code: input.internalCode || null,
