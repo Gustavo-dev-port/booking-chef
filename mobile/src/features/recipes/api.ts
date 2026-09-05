@@ -16,6 +16,8 @@ export type RecipeIngredient = {
   ingredient_name: string;
   quantity: number;
   unit: string;
+  /** V2, Épico 07 — vínculo com o catálogo de insumos (ver validators/recipe.ts). */
+  ingredient_id: string | null;
 };
 
 export type RecipeDetail = RecipeSummary & {
@@ -25,11 +27,13 @@ export type RecipeDetail = RecipeSummary & {
   final_weight: string | null;
   instructions: string | null;
   notes: string | null;
+  /** V2, Épico 07 — preço de venda (sempre 0 até a v0.0.1; volta agora pro cálculo de CMV). */
+  sale_price: number;
   ingredients: RecipeIngredient[];
 };
 
 const SUMMARY_COLUMNS = 'id, name, category, type, photo_path, updated_at';
-const DETAIL_COLUMNS = `${SUMMARY_COLUMNS}, yield_amount, glass_type, garnish, final_weight, instructions, notes`;
+const DETAIL_COLUMNS = `${SUMMARY_COLUMNS}, yield_amount, glass_type, garnish, final_weight, instructions, notes, sale_price`;
 
 export async function listRecipes(companyId: string, type: RecipeType): Promise<RecipeSummary[]> {
   const { data, error } = await supabase
@@ -61,7 +65,7 @@ export async function getRecipe(id: string): Promise<RecipeDetail | null> {
       supabase.from('products').select(DETAIL_COLUMNS).eq('id', id).maybeSingle(),
       supabase
         .from('product_ingredients')
-        .select('id, ingredient_name, quantity, unit')
+        .select('id, ingredient_name, quantity, unit, ingredient_id')
         .eq('product_id', id),
     ]);
   if (productError) throw new Error(productError.message);
@@ -89,12 +93,15 @@ async function replaceIngredients(companyId: string, productId: string, rows: In
       ingredient_name: row.ingredientName,
       quantity: row.quantity,
       unit: row.unit,
+      ingredient_id: row.ingredientId || null,
     }))
   );
   if (insertError) throw new Error(insertError.message);
 
   // Fase 8 — conciliação de insumos (best-effort: não trava o salvamento
-  // da ficha se falhar). Ver src/features/recipes/reconciliation.ts.
+  // da ficha se falhar). Só mexe em linhas sem ingredient_id — uma linha
+  // já vinculada pela Épico 07 (07.1) nunca passa por aqui de novo. Ver
+  // src/features/recipes/reconciliation.ts.
   await reconcileIngredients(companyId, productId, rows);
 }
 
@@ -108,6 +115,10 @@ function toProductRow(input: RecipeInput) {
     final_weight: input.finalWeight || null,
     instructions: input.instructions || null,
     notes: input.notes || null,
+    // sale_price é NOT NULL na tabela. Sempre gravou 0 até a v0.0.1 (sem
+    // pedir preço de venda); V2/Épico 07 traz o campo de volta pro
+    // cálculo de CMV — continua opcional no formulário, grava 0 se vazio.
+    sale_price: input.salePrice ?? 0,
   };
 }
 
@@ -115,9 +126,7 @@ function toProductRow(input: RecipeInput) {
 export async function createRecipe(companyId: string, type: RecipeType, input: RecipeInput): Promise<string> {
   const { data, error } = await supabase
     .from('products')
-    // sale_price é NOT NULL na tabela (campo do cardápio digital) — ficha
-    // técnica não pede preço de venda na v0.0.1, então grava 0.
-    .insert({ ...toProductRow(input), company_id: companyId, type, sale_price: 0 })
+    .insert({ ...toProductRow(input), company_id: companyId, type })
     .select('id')
     .single();
   if (error) throw new Error(error.message);

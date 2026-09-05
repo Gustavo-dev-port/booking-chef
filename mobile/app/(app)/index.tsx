@@ -46,13 +46,14 @@ export default function HomeScreen() {
         />
       </View>
 
-      <View className="mt-3">
+      <View className="mt-3 flex-row gap-3">
         <ModuleCard
           icon="📖"
           title="Gerar Booking"
           subtitle="Booking para impressão"
           onPress={() => router.push('/booking')}
         />
+        <ModuleCard icon="📦" title="Estoque" subtitle="Insumos" onPress={() => router.push('/inventory')} />
       </View>
 
       <Text className="mb-3 mt-8 text-sm font-semibold text-gray-500 dark:text-gray-400">Últimas fichas editadas</Text>

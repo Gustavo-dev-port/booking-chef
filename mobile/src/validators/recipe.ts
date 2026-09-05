@@ -40,6 +40,15 @@ export const ingredientRowSchema = z.object({
   ingredientName: z.string().trim().min(1, 'Informe o ingrediente'),
   quantity: z.coerce.number({ error: 'Informe a quantidade' }).nonnegative('Deve ser 0 ou mais'),
   unit: z.enum(ingredientUnitValues, { error: 'Escolha a unidade' }),
+  /**
+   * V2, Épico 07, história 07.1 — vínculo opcional com o catálogo de
+   * insumos (`ingredients`, o mesmo estendido na Fase de Estoque). Quando
+   * preenchido, nome/unidade vêm do insumo selecionado (travados na tela
+   * de edição) e a linha entra no cálculo de custo/CMV (07.2). Sem
+   * vínculo, o ingrediente continua 100% texto livre (comportamento
+   * original, v0.0.1) — só que sem custo conhecido pro cálculo.
+   */
+  ingredientId: z.string().trim().optional(),
 });
 export type IngredientRowInput = z.infer<typeof ingredientRowSchema>;
 
@@ -59,6 +68,13 @@ export const recipeSchema = z.object({
   instructions: z.string().trim().optional(),
   notes: z.string().trim().optional(),
   ingredients: z.array(ingredientRowSchema),
+  /**
+   * V2, Épico 07 — preço de venda. Fora de escopo na v0.0.1 (sempre
+   * gravava 0, ver Fase 4); volta agora porque CMV% não existe sem um
+   * preço pra comparar o custo. Opcional: ficha sem preço ainda definido
+   * continua salvando normalmente, só sem CMV% calculado.
+   */
+  salePrice: z.coerce.number({ error: 'Informe o preço' }).nonnegative('Deve ser 0 ou mais').optional(),
 });
 /** Tipo depois da validação (quantity já é number) — usado pelas funções de API. */
 export type RecipeInput = z.infer<typeof recipeSchema>;
