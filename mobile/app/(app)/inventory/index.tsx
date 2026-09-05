@@ -6,6 +6,8 @@ import { InventoryItemCard } from '../../../src/components/InventoryItemCard';
 import { PrimaryButton } from '../../../src/components/PrimaryButton';
 import { listCategories, listInventoryItems, type InventoryItem, type NamedOption } from '../../../src/features/inventory/api';
 import { useAuthStore } from '../../../src/features/auth/store';
+import { canManageBusiness, resolveAppRole } from '../../../src/features/team/permissions';
+import { useRoleGuard } from '../../../src/hooks/useRoleGuard';
 
 type FilterMode = 'all' | 'lowStock';
 
@@ -13,9 +15,15 @@ type FilterMode = 'all' | 'lowStock';
  * Lista de insumos em estoque (V2, Épico 06). Mesmo padrão de volume
  * pequeno + filtro em memória já usado na lista de fichas técnicas — ver
  * app/(app)/recipes/[type]/index.tsx.
+ *
+ * V2, história 08.3 — Estoque só pra proprietario/gerente (ver
+ * src/features/team/permissions.ts); reforça na interface o que a RLS
+ * de `ingredients` já bloqueia de verdade.
  */
 export default function InventoryListScreen() {
-  const companyId = useAuthStore((s) => s.membership?.company_id);
+  const membership = useAuthStore((s) => s.membership);
+  const companyId = membership?.company_id;
+  useRoleGuard(canManageBusiness(resolveAppRole(membership)));
 
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [categories, setCategories] = useState<NamedOption[]>([]);

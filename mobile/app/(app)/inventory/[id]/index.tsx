@@ -26,6 +26,8 @@ import {
   type NamedOption,
 } from '../../../../src/features/inventory/api';
 import { useAuthStore } from '../../../../src/features/auth/store';
+import { canManageBusiness, resolveAppRole } from '../../../../src/features/team/permissions';
+import { useRoleGuard } from '../../../../src/hooks/useRoleGuard';
 import { ingredientUnitLabel } from '../../../../src/validators/recipe';
 
 const EMPTY_VALUES: InventoryItemFormValues = {
@@ -50,7 +52,9 @@ const EMPTY_VALUES: InventoryItemFormValues = {
 export default function InventoryItemEditorScreen() {
   const params = useLocalSearchParams<{ id: string }>();
   const isNew = params.id === 'new';
-  const companyId = useAuthStore((s) => s.membership?.company_id);
+  const membership = useAuthStore((s) => s.membership);
+  const companyId = membership?.company_id;
+  useRoleGuard(canManageBusiness(resolveAppRole(membership)));
 
   const [loading, setLoading] = useState(!isNew);
   const [formError, setFormError] = useState<string | null>(null);

@@ -7,6 +7,8 @@ import { getInventoryItem, type InventoryItem } from '../../../../src/features/i
 import { listMovements, registerMovement, type InventoryMovement } from '../../../../src/features/inventory/movements';
 import { MOVEMENT_TYPES, movementTypeLabel, type MovementType } from '../../../../src/features/inventory/movementType';
 import { useAuthStore } from '../../../../src/features/auth/store';
+import { canManageBusiness, resolveAppRole } from '../../../../src/features/team/permissions';
+import { useRoleGuard } from '../../../../src/hooks/useRoleGuard';
 import { ingredientUnitLabel } from '../../../../src/validators/recipe';
 
 function formatDate(iso: string): string {
@@ -15,16 +17,19 @@ function formatDate(iso: string): string {
 
 /**
  * Lançar movimentação (06.2) + histórico (06.3), numa tela só — insumo
- * único, faz sentido gerenciar os dois juntos. "Autor" no histórico: por
- * enquanto todo insumo só tem o próprio dono lançando (Equipe é Sprint 4,
- * ainda não existe usuário B numa mesma empresa) — quando isso mudar,
- * resolver nome de outro autor vai precisar de uma função/view própria,
- * já que `profiles` só é legível pelo próprio dono da linha (RLS).
+ * único, faz sentido gerenciar os dois juntos. Estoque é só pra
+ * proprietario/gerente (V2, história 08.3 — ver useRoleGuard abaixo).
+ * "Autor" no histórico: um gerente (V2, Épico 08) já pode lançar
+ * movimentação além do dono, mas resolver o NOME de outro autor ainda
+ * exigiria uma função/view própria (profiles só é legível pelo próprio
+ * dono da linha, RLS) — por enquanto mostra só "Você" ou "Outro usuário".
  */
 export default function InventoryMovementsScreen() {
   const params = useLocalSearchParams<{ id: string }>();
   const session = useAuthStore((s) => s.session);
   const profile = useAuthStore((s) => s.profile);
+  const membership = useAuthStore((s) => s.membership);
+  useRoleGuard(canManageBusiness(resolveAppRole(membership)));
 
   const [item, setItem] = useState<InventoryItem | null>(null);
   const [movements, setMovements] = useState<InventoryMovement[]>([]);

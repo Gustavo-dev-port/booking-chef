@@ -1,18 +1,26 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { Link, useFocusEffect, useRouter } from 'expo-router';
 import { ModuleCard } from '../../src/components/ModuleCard';
 import { RecipeCard } from '../../src/components/RecipeCard';
 import { listRecentRecipes, type RecipeSummary } from '../../src/features/recipes/api';
 import { useAuthStore } from '../../src/features/auth/store';
+import { resolveAppRole, canAccessRecipeType, canManageBusiness } from '../../src/features/team/permissions';
 
 /**
  * Home: módulos Bar/Cozinha navegam pra lista de fichas filtrada por type;
  * "Gerar Booking" (Fase 5) abre a tela de geração do PDF.
+ *
+ * V2, história 08.3 — só mostra o módulo pra quem o papel permite (ver
+ * src/features/team/permissions.ts). É só a camada de conveniência: quem
+ * tenta acessar direto por link é bloqueado de verdade pelo guard de
+ * cada tela + pela RLS no banco.
  */
 export default function HomeScreen() {
   const router = useRouter();
   const companyId = useAuthStore((s) => s.membership?.company_id);
+  const membership = useAuthStore((s) => s.membership);
+  const role = useMemo(() => resolveAppRole(membership), [membership]);
   const [recent, setRecent] = useState<RecipeSummary[]>([]);
 
   useFocusEffect(
@@ -37,13 +45,17 @@ export default function HomeScreen() {
       </View>
 
       <View className="flex-row gap-3">
-        <ModuleCard icon="🍸" title="Bar" subtitle="Drinks" onPress={() => router.push('/recipes/bar')} />
-        <ModuleCard
-          icon="👨‍🍳"
-          title="Cozinha"
-          subtitle="Pratos"
-          onPress={() => router.push('/recipes/cozinha')}
-        />
+        {canAccessRecipeType(role, 'bar') ? (
+          <ModuleCard icon="🍸" title="Bar" subtitle="Drinks" onPress={() => router.push('/recipes/bar')} />
+        ) : null}
+        {canAccessRecipeType(role, 'cozinha') ? (
+          <ModuleCard
+            icon="👨‍🍳"
+            title="Cozinha"
+            subtitle="Pratos"
+            onPress={() => router.push('/recipes/cozinha')}
+          />
+        ) : null}
       </View>
 
       <View className="mt-3 flex-row gap-3">
@@ -53,13 +65,17 @@ export default function HomeScreen() {
           subtitle="Booking para impressão"
           onPress={() => router.push('/booking')}
         />
-        <ModuleCard icon="📦" title="Estoque" subtitle="Insumos" onPress={() => router.push('/inventory')} />
+        {canManageBusiness(role) ? (
+          <ModuleCard icon="📦" title="Estoque" subtitle="Insumos" onPress={() => router.push('/inventory')} />
+        ) : null}
       </View>
 
-      <View className="mt-3 flex-row gap-3">
-        <ModuleCard icon="👥" title="Equipe" subtitle="Convites" onPress={() => router.push('/team')} />
-        <View className="flex-1" />
-      </View>
+      {canManageBusiness(role) ? (
+        <View className="mt-3 flex-row gap-3">
+          <ModuleCard icon="👥" title="Equipe" subtitle="Convites" onPress={() => router.push('/team')} />
+          <View className="flex-1" />
+        </View>
+      ) : null}
 
       <Text className="mb-3 mt-8 text-sm font-semibold text-gray-500 dark:text-gray-400">Últimas fichas editadas</Text>
       {recent.length === 0 ? (

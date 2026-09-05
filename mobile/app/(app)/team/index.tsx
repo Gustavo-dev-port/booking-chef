@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { FlatList, Pressable, RefreshControl, Text, View } from 'react-native';
+import { Alert, FlatList, Pressable, RefreshControl, Text, View } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -8,27 +8,31 @@ import { FormField } from '../../../src/components/FormField';
 import { KeyboardAvoidingScreen } from '../../../src/components/KeyboardAvoidingScreen';
 import { PrimaryButton } from '../../../src/components/PrimaryButton';
 import { employeeInviteSchema, type EmployeeInviteInput } from '../../../src/validators/team';
-import { inviteEmployee, listEmployees, type Employee } from '../../../src/features/team/api';
+import { inviteEmployee, listEmployees, removeEmployeeAccess, type Employee } from '../../../src/features/team/api';
 import { EMPLOYEE_ROLES, employeeRoleLabel, employeeStatusLabel } from '../../../src/features/team/role';
 import { useAuthStore } from '../../../src/features/auth/store';
+import { canManageBusiness, resolveAppRole } from '../../../src/features/team/permissions';
+import { useRoleGuard } from '../../../src/hooks/useRoleGuard';
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' });
 }
 
 /**
- * Equipe (V2, Épico 08, história 08.1 — convite de funcionário). Lista +
- * formulário de convite na mesma tela, mesmo padrão de
+ * Equipe (V2, Épico 08 — convidar (08.1), listar, remover acesso
+ * (08.4)). Lista + formulário de convite na mesma tela, mesmo padrão de
  * app/(app)/inventory/[id]/movements.tsx.
  *
- * Escopo desta história: só criar e mandar o convite (via Edge Function
- * invite-employee) e listar quem já foi convidado/está ativo. Ativar a
- * conta convidada (08.2) e restringir acesso por papel (08.3) são
- * Sprint 5 — até lá, um convite não dá nenhum acesso a dado da empresa.
+ * V2, história 08.3 — só proprietario/gerente acessam a tela (useRoleGuard
+ * abaixo); "Convidar" e "Remover acesso" ficam restritos ainda mais, só
+ * ao proprietário (mesma regra da RLS de employees_update/da Edge
+ * Function invite-employee).
  */
 export default function TeamScreen() {
-  const companyId = useAuthStore((s) => s.membership?.company_id);
-  const isOwner = useAuthStore((s) => s.membership?.is_owner ?? false);
+  const membership = useAuthStore((s) => s.membership);
+  const companyId = membership?.company_id;
+  const isOwner = membership?.is_owner ?? false;
+  useRoleGuard(canManageBusiness(resolveAppRole(membership)));
 
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
@@ -75,6 +79,28 @@ export default function TeamScreen() {
     } catch (error) {
       setFormError(error instanceof Error ? error.message : 'Não foi possível convidar.');
     }
+  };
+
+  const handleRemoveAccess = (employee: Employee) => {
+    Alert.alert(
+      'Remover acesso',
+      `${employee.name} não vai mais conseguir entrar no Booking Chef deste estabelecimento. As fichas técnicas e movimentações que essa pessoa criou continuam no histórico. Continuar?`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Remover acesso',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await removeEmployeeAccess(employee.id);
+              await load();
+            } catch (error) {
+              Alert.alert('Não foi possível remover', error instanceof Error ? error.message : 'Tente novamente.');
+            }
+          },
+        },
+      ]
+    );
   };
 
   return (
@@ -158,6 +184,16 @@ export default function TeamScreen() {
             <Text className="mt-1 text-xs text-gray-500 dark:text-gray-400">
               Convidado em {formatDate(item.invited_at)}
             </Text>
+            {isOwner && item.status !== 'removido' ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`Remover acesso de ${item.name}`}
+                onPress={() => handleRemoveAccess(item)}
+                className="mt-2 min-h-[32px] self-start justify-center"
+              >
+                <Text className="text-sm font-medium text-red-600">Remover acesso</Text>
+              </Pressable>
+            ) : null}
           </View>
         )}
         ListEmptyComponent={

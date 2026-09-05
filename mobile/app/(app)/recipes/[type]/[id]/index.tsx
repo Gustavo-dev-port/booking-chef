@@ -30,6 +30,8 @@ import { pickPhoto, uploadRecipePhoto, type PickedPhoto } from '../../../../../s
 import { listCategories, listInventoryItems, type InventoryItem, type NamedOption } from '../../../../../src/features/inventory/api';
 import { useRecipePhotoUrl } from '../../../../../src/hooks/useRecipePhotoUrl';
 import { useAuthStore } from '../../../../../src/features/auth/store';
+import { canAccessRecipeType, canSeeFinancials, canWriteRecipes, resolveAppRole } from '../../../../../src/features/team/permissions';
+import { useRoleGuard } from '../../../../../src/hooks/useRoleGuard';
 
 const EMPTY_VALUES: RecipeFormValues = {
   name: '',
@@ -61,7 +63,12 @@ export default function RecipeEditorScreen() {
   const rawType = params.type ?? '';
   const type = isRecipeType(rawType) ? rawType : 'bar';
   const isNew = params.id === 'new';
-  const companyId = useAuthStore((s) => s.membership?.company_id);
+  const membership = useAuthStore((s) => s.membership);
+  const companyId = membership?.company_id;
+  const role = useMemo(() => resolveAppRole(membership), [membership]);
+  useRoleGuard(canAccessRecipeType(role, type));
+  const canWrite = canWriteRecipes(role);
+  const canSeePricing = canSeeFinancials(role);
 
   const [loading, setLoading] = useState(!isNew);
   const [formError, setFormError] = useState<string | null>(null);
@@ -297,7 +304,8 @@ export default function RecipeEditorScreen() {
                 accessibilityRole="button"
                 accessibilityLabel="Remover ingrediente"
                 onPress={() => remove(index)}
-                className="mt-9 h-11 w-11 items-center justify-center"
+                disabled={!canWrite}
+                className={'mt-9 h-11 w-11 items-center justify-center' + (canWrite ? '' : ' opacity-0')}
               >
                 <Text className="text-lg text-red-600">✕</Text>
               </Pressable>
@@ -305,14 +313,23 @@ export default function RecipeEditorScreen() {
           </View>
         );
       })}
-      <View className="mb-4">
-        <PrimaryButton
-          label="+ Adicionar ingrediente"
-          variant="outline"
-          onPress={() => append({ ingredientName: '', quantity: 0, unit: 'un', ingredientId: '' })}
-        />
-      </View>
+      {canWrite ? (
+        <View className="mb-4">
+          <PrimaryButton
+            label="+ Adicionar ingrediente"
+            variant="outline"
+            onPress={() => append({ ingredientName: '', quantity: 0, unit: 'un', ingredientId: '' })}
+          />
+        </View>
+      ) : null}
 
+      {/* Custo/CMV/preço sugerido são dado financeiro (V2, história 08.3)
+          — só proprietario/gerente veem essa seção inteira; bartender/
+          cozinheiro/visualizador nem chegam a saber o custo do que
+          editam. Reforça na interface o que a RLS de ingredients já
+          bloqueia de verdade (listInventoryItems volta vazio pra eles). */}
+      {canSeePricing ? (
+        <>
       <FormField
         control={control}
         name="salePrice"
@@ -403,6 +420,8 @@ export default function RecipeEditorScreen() {
           </View>
         </View>
       ) : null}
+        </>
+      ) : null}
 
       <FormField control={control} name="category" label="Categoria (opcional)" />
       <FormField control={control} name="yieldAmount" label="Rendimento (ex.: 1 dose, 4 porções)" />
@@ -451,11 +470,14 @@ export default function RecipeEditorScreen() {
 
       {formError ? <Text className="mb-4 text-sm text-red-600">{formError}</Text> : null}
 
-      <View className="mb-3">
-        <PrimaryButton label="Salvar ficha" onPress={handleSubmit(onSubmit)} loading={isSubmitting} />
-      </View>
-
-      {!isNew ? <PrimaryButton label="Arquivar ficha" variant="outline" onPress={handleArchive} /> : null}
+      {canWrite ? (
+        <>
+          <View className="mb-3">
+            <PrimaryButton label="Salvar ficha" onPress={handleSubmit(onSubmit)} loading={isSubmitting} />
+          </View>
+          {!isNew ? <PrimaryButton label="Arquivar ficha" variant="outline" onPress={handleArchive} /> : null}
+        </>
+      ) : null}
     </KeyboardAvoidingScreen>
   );
 }
