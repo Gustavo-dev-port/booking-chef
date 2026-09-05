@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Alert, Text, View } from 'react-native';
 import { Link, router, useLocalSearchParams } from 'expo-router';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { BackButton } from '../../../../src/components/BackButton';
 import { FormField } from '../../../../src/components/FormField';
@@ -26,12 +26,15 @@ import {
   type NamedOption,
 } from '../../../../src/features/inventory/api';
 import { useAuthStore } from '../../../../src/features/auth/store';
+import { ingredientUnitLabel } from '../../../../src/validators/recipe';
 
 const EMPTY_VALUES: InventoryItemFormValues = {
   name: '',
   categoryId: '',
-  unit: 'un',
-  pricePerUnit: 0,
+  purchaseUnit: 'un',
+  usageUnit: 'un',
+  packageContent: 1,
+  packagePrice: 0,
   minimumQuantity: 0,
   supplierId: '',
   internalCode: '',
@@ -64,6 +67,19 @@ export default function InventoryItemEditorScreen() {
     defaultValues: EMPTY_VALUES,
   });
 
+  const purchaseUnit = useWatch({ control, name: 'purchaseUnit' });
+  const usageUnit = useWatch({ control, name: 'usageUnit' });
+  const packageContent = useWatch({ control, name: 'packageContent' });
+  const packagePrice = useWatch({ control, name: 'packagePrice' });
+  const purchaseUnitLabel = ingredientUnitLabel(purchaseUnit || 'un');
+  const usageUnitLabel = ingredientUnitLabel(usageUnit || 'un');
+  const parsedPackageContent = Number(packageContent);
+  const parsedPackagePrice = Number(packagePrice);
+  const unitCostPreview =
+    parsedPackageContent > 0 && !Number.isNaN(parsedPackagePrice)
+      ? parsedPackagePrice / parsedPackageContent
+      : null;
+
   useEffect(() => {
     if (!companyId) return;
     Promise.all([listCategories(companyId), listSuppliers(companyId)]).then(([cats, sups]) => {
@@ -83,8 +99,10 @@ export default function InventoryItemEditorScreen() {
       reset({
         name: item.name,
         categoryId: item.category_id ?? '',
-        unit: item.usage_unit as InventoryItemFormValues['unit'],
-        pricePerUnit: item.package_price,
+        purchaseUnit: item.purchase_unit as InventoryItemFormValues['purchaseUnit'],
+        usageUnit: item.usage_unit as InventoryItemFormValues['usageUnit'],
+        packageContent: item.package_content,
+        packagePrice: item.package_price,
         minimumQuantity: item.minimum_quantity,
         supplierId: item.supplier_id ?? '',
         internalCode: item.internal_code ?? '',
@@ -157,16 +175,55 @@ export default function InventoryItemEditorScreen() {
         onCreated={(option) => setCategories((prev) => [...prev, option])}
       />
 
+      <Text className="mb-1 mt-2 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+        Compra × uso
+      </Text>
+      <Text className="mb-3 text-sm text-gray-500 dark:text-gray-400">
+        Quantidade (quanto você compra) e volume (quanto tem em cada compra) são coisas diferentes — ex.: 1
+        garrafa (unidade de compra) tem 750 mL (unidade de uso).
+      </Text>
+
       <View className="flex-row gap-3">
         <View className="flex-1">
-          <UnitPicker control={control} name="unit" label="Unidade" />
+          <UnitPicker control={control} name="purchaseUnit" label="Unidade de compra" />
         </View>
         <View className="flex-1">
-          <FormField control={control} name="pricePerUnit" label="Preço por unidade" keyboardType="decimal-pad" />
+          <UnitPicker control={control} name="usageUnit" label="Unidade de uso (receitas)" />
         </View>
       </View>
 
-      <FormField control={control} name="minimumQuantity" label="Quantidade mínima" keyboardType="decimal-pad" />
+      <View className="flex-row gap-3">
+        <View className="flex-1">
+          <FormField
+            control={control}
+            name="packageContent"
+            label={`${usageUnitLabel} por ${purchaseUnitLabel}`}
+            keyboardType="decimal-pad"
+            hint={`Ex.: 750 se 1 ${purchaseUnitLabel} tem 750 ${usageUnitLabel}`}
+          />
+        </View>
+        <View className="flex-1">
+          <FormField
+            control={control}
+            name="packagePrice"
+            label={`Preço por ${purchaseUnitLabel}`}
+            keyboardType="decimal-pad"
+          />
+        </View>
+      </View>
+
+      {unitCostPreview !== null ? (
+        <Text className="mb-4 -mt-2 text-sm text-gray-500 dark:text-gray-400">
+          Custo por {usageUnitLabel}: R$ {unitCostPreview.toFixed(4)}
+        </Text>
+      ) : null}
+
+      <FormField
+        control={control}
+        name="minimumQuantity"
+        label={`Quantidade mínima (${usageUnitLabel})`}
+        keyboardType="decimal-pad"
+      />
 
       <PickerWithCreate
         control={control}
