@@ -1,16 +1,20 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { Link, useFocusEffect, useRouter } from 'expo-router';
-import { BookOpen, ChefHat, Martini, Package, Users } from 'lucide-react-native';
-import { ModuleCard } from '../../src/components/ModuleCard';
-import { RecipeCard } from '../../src/components/RecipeCard';
-import { listRecentRecipes, type RecipeSummary } from '../../src/features/recipes/api';
-import { useAuthStore } from '../../src/features/auth/store';
-import { resolveAppRole, canAccessRecipeType, canManageBusiness } from '../../src/features/team/permissions';
+import { BookOpen, ChefHat, Martini } from 'lucide-react-native';
+import { ModuleCard } from '../../../src/components/ModuleCard';
+import { RecipeCard } from '../../../src/components/RecipeCard';
+import { listRecentRecipes, type RecipeSummary } from '../../../src/features/recipes/api';
+import { useAuthStore } from '../../../src/features/auth/store';
+import { resolveAppRole, canAccessRecipeType } from '../../../src/features/team/permissions';
 
 /**
  * Home: módulos Bar/Cozinha navegam pra lista de fichas filtrada por type;
  * "Gerar Booking" (Fase 5) abre a tela de geração do PDF.
+ *
+ * Estoque, Equipe e Perfil viraram abas da barra inferior (Design System
+ * v1, seção 05 — ver app/(app)/(tabs)/_layout.tsx) — saíram daqui pra não
+ * duplicar caminho de navegação.
  *
  * V2, história 08.3 — só mostra o módulo pra quem o papel permite (ver
  * src/features/team/permissions.ts). É só a camada de conveniência: quem
@@ -33,16 +37,9 @@ export default function HomeScreen() {
 
   return (
     <ScrollView className="flex-1 bg-surface-page dark:bg-surface-page-dark" contentContainerClassName="p-4 pt-16">
-      <View className="mb-6 flex-row items-start justify-between">
-        <View className="flex-1 pr-3">
-          <Text className="mb-1 font-display text-4xl text-ink dark:text-ink-dark">Fichas técnicas</Text>
-          <Text className="text-base text-ink-secondary dark:text-ink-secondary-dark">O caderno digital de receitas do seu estabelecimento</Text>
-        </View>
-        <Link href="/profile" asChild>
-          <Pressable accessibilityRole="button" accessibilityLabel="Perfil" hitSlop={8} className="min-h-[44px] min-w-[44px] items-end justify-center">
-            <Text className="text-sm font-archivo-medium text-brand dark:text-brand-dark">Perfil</Text>
-          </Pressable>
-        </Link>
+      <View className="mb-6">
+        <Text className="mb-1 font-display text-4xl text-ink dark:text-ink-dark">Fichas técnicas</Text>
+        <Text className="text-base text-ink-secondary dark:text-ink-secondary-dark">O caderno digital de receitas do seu estabelecimento</Text>
       </View>
 
       <View className="flex-row gap-3">
@@ -66,17 +63,8 @@ export default function HomeScreen() {
           subtitle="Booking para impressão"
           onPress={() => router.push('/booking')}
         />
-        {canManageBusiness(role) ? (
-          <ModuleCard icon={Package} title="Estoque" subtitle="Insumos" onPress={() => router.push('/inventory')} />
-        ) : null}
+        <View className="flex-1" />
       </View>
-
-      {canManageBusiness(role) ? (
-        <View className="mt-3 flex-row gap-3">
-          <ModuleCard icon={Users} title="Equipe" subtitle="Convites" onPress={() => router.push('/team')} />
-          <View className="flex-1" />
-        </View>
-      ) : null}
 
       <Text className="mb-3 mt-8 text-sm font-archivo-semibold text-ink-secondary dark:text-ink-secondary-dark">Últimas fichas editadas</Text>
       {recent.length === 0 ? (

@@ -3,7 +3,6 @@ import { Alert, FlatList, Pressable, RefreshControl, Text, View } from 'react-na
 import { useFocusEffect } from 'expo-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { BackButton } from '../../../src/components/BackButton';
 import { FormField } from '../../../src/components/FormField';
 import { KeyboardAvoidingScreen } from '../../../src/components/KeyboardAvoidingScreen';
 import { PrimaryButton } from '../../../src/components/PrimaryButton';
@@ -105,7 +104,6 @@ export default function TeamScreen() {
 
   return (
     <KeyboardAvoidingScreen className="flex-1 bg-surface-page dark:bg-surface-page-dark" contentContainerClassName="px-4 pb-24 pt-16">
-      <BackButton />
       <Text className="mb-6 text-2xl font-archivo-bold text-ink dark:text-ink-dark">Equipe</Text>
 
       {isOwner ? (

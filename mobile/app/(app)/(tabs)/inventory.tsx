@@ -1,7 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Alert, FlatList, Pressable, RefreshControl, Text, TextInput, View } from 'react-native';
 import { Link, router, useFocusEffect } from 'expo-router';
-import { BackButton } from '../../../src/components/BackButton';
 import { InventoryItemCard } from '../../../src/components/InventoryItemCard';
 import { PrimaryButton } from '../../../src/components/PrimaryButton';
 import {
@@ -125,7 +124,6 @@ export default function InventoryListScreen() {
   return (
     <View className="flex-1 bg-surface-page dark:bg-surface-page-dark pt-16">
       <View className="px-4">
-        <BackButton />
         <View className="mb-4 flex-row items-center justify-between">
           <Text className="text-2xl font-archivo-bold text-ink dark:text-ink-dark">Estoque</Text>
           {visibleItems.length > 0 ? (

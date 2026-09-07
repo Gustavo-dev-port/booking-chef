@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
 import { Link, router } from 'expo-router';
-import { BackButton } from '../../src/components/BackButton';
-import { PrimaryButton } from '../../src/components/PrimaryButton';
-import { deleteAccount, signOut } from '../../src/features/auth/api';
-import { useAuthStore } from '../../src/features/auth/store';
-import { useThemeStore, type ThemePreference } from '../../src/features/theme/store';
-import { supabase } from '../../src/lib/supabase';
+import { PrimaryButton } from '../../../src/components/PrimaryButton';
+import { deleteAccount, signOut } from '../../../src/features/auth/api';
+import { useAuthStore } from '../../../src/features/auth/store';
+import { useThemeStore, type ThemePreference } from '../../../src/features/theme/store';
+import { supabase } from '../../../src/lib/supabase';
 
 const THEME_OPTIONS: Array<{ value: ThemePreference; label: string }> = [
   { value: 'light', label: 'Claro' },
@@ -66,7 +65,6 @@ export default function ProfileScreen() {
 
   return (
     <ScrollView className="flex-1 bg-surface-card dark:bg-surface-card-dark" contentContainerClassName="px-6 py-16">
-      <BackButton />
       <Text className="mb-6 text-2xl font-archivo-bold text-ink dark:text-ink-dark">Perfil</Text>
 
       <View className="mb-8 rounded-2xl border border-surface-border dark:border-surface-border-dark p-4">
