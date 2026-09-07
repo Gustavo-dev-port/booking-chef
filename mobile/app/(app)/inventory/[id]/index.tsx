@@ -21,16 +21,24 @@ import {
   createSupplier,
   getInventoryItem,
   listCategories,
+  listInventoryItems,
   listSuppliers,
   updateInventoryItem,
   type NamedOption,
 } from '../../../../src/features/inventory/api';
 import { useAuthStore } from '../../../../src/features/auth/store';
+import { canManageBusiness, resolveAppRole } from '../../../../src/features/team/permissions';
+import { useRoleGuard } from '../../../../src/hooks/useRoleGuard';
+import { useConfirmDiscardChanges } from '../../../../src/hooks/useConfirmDiscardChanges';
+import { findSimilarExistingName } from '../../../../src/features/recipes/ingredientName';
 import { ingredientUnitLabel } from '../../../../src/validators/recipe';
 
 const EMPTY_VALUES: InventoryItemFormValues = {
   name: '',
   categoryId: '',
+  // Sempre "Un" — compra-se sempre em unidades inteiras (garrafa, caixa,
+  // pacote...); só o volume/peso dentro de cada unidade varia (pedido do
+  // usuário: "quantidade sempre vai ser em Unidade, volume pode variar").
   purchaseUnit: 'un',
   usageUnit: 'un',
   packageContent: 1,
@@ -50,28 +58,30 @@ const EMPTY_VALUES: InventoryItemFormValues = {
 export default function InventoryItemEditorScreen() {
   const params = useLocalSearchParams<{ id: string }>();
   const isNew = params.id === 'new';
-  const companyId = useAuthStore((s) => s.membership?.company_id);
+  const membership = useAuthStore((s) => s.membership);
+  const companyId = membership?.company_id;
+  useRoleGuard(canManageBusiness(resolveAppRole(membership)));
 
   const [loading, setLoading] = useState(!isNew);
   const [formError, setFormError] = useState<string | null>(null);
   const [categories, setCategories] = useState<NamedOption[]>([]);
   const [suppliers, setSuppliers] = useState<NamedOption[]>([]);
+  const [existingNames, setExistingNames] = useState<string[]>([]);
 
   const {
     control,
     handleSubmit,
     reset,
-    formState: { isSubmitting },
+    getValues,
+    formState: { isSubmitting, isDirty },
   } = useForm<InventoryItemFormValues, unknown, InventoryItemInput>({
     resolver: zodResolver(inventoryItemSchema),
     defaultValues: EMPTY_VALUES,
   });
 
-  const purchaseUnit = useWatch({ control, name: 'purchaseUnit' });
   const usageUnit = useWatch({ control, name: 'usageUnit' });
   const packageContent = useWatch({ control, name: 'packageContent' });
   const packagePrice = useWatch({ control, name: 'packagePrice' });
-  const purchaseUnitLabel = ingredientUnitLabel(purchaseUnit || 'un');
   const usageUnitLabel = ingredientUnitLabel(usageUnit || 'un');
   const parsedPackageContent = Number(packageContent);
   const parsedPackagePrice = Number(packagePrice);
@@ -82,11 +92,17 @@ export default function InventoryItemEditorScreen() {
 
   useEffect(() => {
     if (!companyId) return;
-    Promise.all([listCategories(companyId), listSuppliers(companyId)]).then(([cats, sups]) => {
-      setCategories(cats);
-      setSuppliers(sups);
-    });
-  }, [companyId]);
+    Promise.all([listCategories(companyId), listSuppliers(companyId), listInventoryItems(companyId)]).then(
+      ([cats, sups, items]) => {
+        setCategories(cats);
+        setSuppliers(sups);
+        // Pra avisar de nome parecido/duplicado ao criar (ver onSubmit) —
+        // exclui o próprio item quando editando, senão ele "colide" com
+        // o próprio nome.
+        setExistingNames(items.filter((i) => i.id !== params.id).map((i) => i.name));
+      }
+    );
+  }, [companyId, params.id]);
 
   useEffect(() => {
     if (isNew) return;
@@ -99,7 +115,9 @@ export default function InventoryItemEditorScreen() {
       reset({
         name: item.name,
         categoryId: item.category_id ?? '',
-        purchaseUnit: item.purchase_unit as InventoryItemFormValues['purchaseUnit'],
+        // Sempre "Un", mesmo que um insumo cadastrado antes desta mudança
+        // tenha outro valor salvo — ver comentário em EMPTY_VALUES.
+        purchaseUnit: 'un',
         usageUnit: item.usage_unit as InventoryItemFormValues['usageUnit'],
         packageContent: item.package_content,
         packagePrice: item.package_price,
@@ -112,7 +130,7 @@ export default function InventoryItemEditorScreen() {
     });
   }, [isNew, params.id, reset]);
 
-  const onSubmit = async (data: InventoryItemInput) => {
+  const saveItem = async (data: InventoryItemInput) => {
     if (!companyId) return;
     setFormError(null);
     try {
@@ -121,11 +139,38 @@ export default function InventoryItemEditorScreen() {
       } else {
         await updateInventoryItem(params.id, data);
       }
+      // Zera isDirty antes de voltar, pra esse mesmo router.back() não
+      // reabrir o aviso de "sair sem salvar" — ver useConfirmDiscardChanges.
+      reset(getValues());
       router.back();
     } catch (error) {
       setFormError(error instanceof Error ? error.message : 'Não foi possível salvar o insumo.');
     }
   };
+
+  /**
+   * Aviso de possível duplicata (ex.: "Vermute" vs "Vermuth", "Água" vs
+   * "agua") só ao CRIAR — editar um insumo existente não compara contra
+   * si mesmo de novo a cada salvamento. Não bloqueia, só confirma —
+   * às vezes são produtos de verdade diferentes com nome parecido.
+   */
+  const onSubmit = async (data: InventoryItemInput) => {
+    const similar = isNew ? findSimilarExistingName(data.name, existingNames) : null;
+    if (similar) {
+      Alert.alert(
+        'Já existe um insumo parecido',
+        `Você já tem "${similar}" cadastrado. Criar "${data.name}" mesmo assim?`,
+        [
+          { text: 'Cancelar', style: 'cancel' },
+          { text: 'Criar mesmo assim', onPress: () => saveItem(data) },
+        ]
+      );
+      return;
+    }
+    await saveItem(data);
+  };
+
+  useConfirmDiscardChanges(isDirty, handleSubmit(onSubmit));
 
   const handleArchive = () => {
     if (isNew) return;
@@ -175,39 +220,25 @@ export default function InventoryItemEditorScreen() {
         onCreated={(option) => setCategories((prev) => [...prev, option])}
       />
 
-      <Text className="mb-1 mt-2 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-        Compra × uso
-      </Text>
-      <Text className="mb-3 text-sm text-gray-500 dark:text-gray-400">
-        Quantidade (quanto você compra) e volume (quanto tem em cada compra) são coisas diferentes — ex.: 1
-        garrafa (unidade de compra) tem 750 mL (unidade de uso).
-      </Text>
-
-      <View className="flex-row gap-3">
-        <View className="flex-1">
-          <UnitPicker control={control} name="purchaseUnit" label="Unidade de compra" />
-        </View>
-        <View className="flex-1">
-          <UnitPicker control={control} name="usageUnit" label="Unidade de uso (receitas)" />
-        </View>
-      </View>
+      <UnitPicker control={control} name="usageUnit" label="Unidade de uso (nas receitas)" />
 
       <View className="flex-row gap-3">
         <View className="flex-1">
           <FormField
             control={control}
             name="packageContent"
-            label={`${usageUnitLabel} por ${purchaseUnitLabel}`}
+            label={`${usageUnitLabel} por unidade`}
             keyboardType="decimal-pad"
-            hint={`Ex.: 750 se 1 ${purchaseUnitLabel} tem 750 ${usageUnitLabel}`}
+            placeholder="Ex.: 750"
           />
         </View>
         <View className="flex-1">
           <FormField
             control={control}
             name="packagePrice"
-            label={`Preço por ${purchaseUnitLabel}`}
+            label="Preço por unidade"
             keyboardType="decimal-pad"
+            placeholder="Ex.: 25,00"
           />
         </View>
       </View>

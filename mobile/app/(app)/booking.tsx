@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import { BackButton } from '../../src/components/BackButton';
 import { PrimaryButton } from '../../src/components/PrimaryButton';
 import { useAuthStore } from '../../src/features/auth/store';
+import { canAccessRecipeType, resolveAppRole } from '../../src/features/team/permissions';
 import { getCompanyName, listRecipesForBooking, type BookingRecipe } from '../../src/features/booking/api';
 import { buildBookingHtml, type BookingSection } from '../../src/features/booking/pdf';
 import { getRecipePhotoUrl } from '../../src/features/recipes/photos';
@@ -12,7 +13,7 @@ import { RECIPE_TYPE_LABELS, type RecipeType } from '../../src/validators/recipe
 
 type Selection = RecipeType | 'both';
 
-const SELECTION_OPTIONS: Array<{ value: Selection; label: string }> = [
+const ALL_SELECTION_OPTIONS: Array<{ value: Selection; label: string }> = [
   { value: 'bar', label: 'Booking do Bar' },
   { value: 'cozinha', label: 'Booking da Cozinha' },
   { value: 'both', label: 'Os dois' },
@@ -42,8 +43,22 @@ async function resolvePhotoUrls(recipes: BookingRecipe[]): Promise<Map<string, s
 }
 
 export default function BookingScreen() {
-  const companyId = useAuthStore((s) => s.membership?.company_id);
-  const [selection, setSelection] = useState<Selection>('both');
+  const membership = useAuthStore((s) => s.membership);
+  const companyId = membership?.company_id;
+  const role = useMemo(() => resolveAppRole(membership), [membership]);
+  // V2, história 08.3 — bartender só gera booking do Bar, cozinheiro só
+  // da Cozinha (a RLS de products bloquearia o outro tipo de qualquer
+  // jeito; isso evita oferecer uma opção que sempre viria vazia).
+  const SELECTION_OPTIONS = useMemo(
+    () =>
+      ALL_SELECTION_OPTIONS.filter(
+        (option) => option.value === 'both' ? canAccessRecipeType(role, 'bar') && canAccessRecipeType(role, 'cozinha') : canAccessRecipeType(role, option.value)
+      ),
+    [role]
+  );
+  const [selection, setSelection] = useState<Selection>(
+    SELECTION_OPTIONS.some((o) => o.value === 'both') ? 'both' : SELECTION_OPTIONS[0]?.value ?? 'both'
+  );
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

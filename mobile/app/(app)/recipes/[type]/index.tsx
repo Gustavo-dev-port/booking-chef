@@ -6,6 +6,8 @@ import { RecipeCard } from '../../../../src/components/RecipeCard';
 import { PrimaryButton } from '../../../../src/components/PrimaryButton';
 import { listRecipes, type RecipeSummary } from '../../../../src/features/recipes/api';
 import { useAuthStore } from '../../../../src/features/auth/store';
+import { canAccessRecipeType, canWriteRecipes, resolveAppRole } from '../../../../src/features/team/permissions';
+import { useRoleGuard } from '../../../../src/hooks/useRoleGuard';
 import { isRecipeType, RECIPE_TYPE_LABELS } from '../../../../src/validators/recipe';
 
 type SortMode = 'name' | 'recent';
@@ -23,7 +25,10 @@ export default function RecipeListScreen() {
   const params = useLocalSearchParams<{ type: string }>();
   const rawType = params.type ?? '';
   const type = isRecipeType(rawType) ? rawType : 'bar';
-  const companyId = useAuthStore((s) => s.membership?.company_id);
+  const membership = useAuthStore((s) => s.membership);
+  const companyId = membership?.company_id;
+  const role = useMemo(() => resolveAppRole(membership), [membership]);
+  useRoleGuard(canAccessRecipeType(role, type));
 
   const [recipes, setRecipes] = useState<RecipeSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -161,15 +166,17 @@ export default function RecipeListScreen() {
               <Text className="mb-4 text-center text-base text-gray-500 dark:text-gray-400">
                 Você ainda não possui nenhuma ficha técnica
               </Text>
-              <Link href={`/recipes/${type}/new`} asChild>
-                <PrimaryButton label="Criar primeira ficha" />
-              </Link>
+              {canWriteRecipes(role) ? (
+                <Link href={`/recipes/${type}/new`} asChild>
+                  <PrimaryButton label="Criar primeira ficha" />
+                </Link>
+              ) : null}
             </View>
           ) : null
         }
       />
 
-      {visibleRecipes.length > 0 ? (
+      {visibleRecipes.length > 0 && canWriteRecipes(role) ? (
         <Link href={`/recipes/${type}/new`} asChild>
           <Pressable
             accessibilityRole="button"

@@ -26,10 +26,13 @@ import {
 import { calculateCmv } from '../../../../../src/features/recipes/cmv';
 import { saveCostSnapshot } from '../../../../../src/features/recipes/costSnapshot';
 import { suggestPrices } from '../../../../../src/features/recipes/pricing';
-import { pickPhoto, uploadRecipePhoto, type PickedPhoto } from '../../../../../src/features/recipes/photos';
+import { pickPhoto, removeRecipePhoto, takePhoto, uploadRecipePhoto, type PickedPhoto } from '../../../../../src/features/recipes/photos';
 import { listCategories, listInventoryItems, type InventoryItem, type NamedOption } from '../../../../../src/features/inventory/api';
 import { useRecipePhotoUrl } from '../../../../../src/hooks/useRecipePhotoUrl';
 import { useAuthStore } from '../../../../../src/features/auth/store';
+import { canAccessRecipeType, canSeeFinancials, canWriteRecipes, resolveAppRole } from '../../../../../src/features/team/permissions';
+import { useRoleGuard } from '../../../../../src/hooks/useRoleGuard';
+import { useConfirmDiscardChanges } from '../../../../../src/hooks/useConfirmDiscardChanges';
 
 const EMPTY_VALUES: RecipeFormValues = {
   name: '',
@@ -61,7 +64,12 @@ export default function RecipeEditorScreen() {
   const rawType = params.type ?? '';
   const type = isRecipeType(rawType) ? rawType : 'bar';
   const isNew = params.id === 'new';
-  const companyId = useAuthStore((s) => s.membership?.company_id);
+  const membership = useAuthStore((s) => s.membership);
+  const companyId = membership?.company_id;
+  const role = useMemo(() => resolveAppRole(membership), [membership]);
+  useRoleGuard(canAccessRecipeType(role, type));
+  const canWrite = canWriteRecipes(role);
+  const canSeePricing = canSeeFinancials(role);
 
   const [loading, setLoading] = useState(!isNew);
   const [formError, setFormError] = useState<string | null>(null);
@@ -75,7 +83,8 @@ export default function RecipeEditorScreen() {
     handleSubmit,
     reset,
     setValue,
-    formState: { isSubmitting },
+    getValues,
+    formState: { isSubmitting, isDirty },
   } = useForm<RecipeFormValues, unknown, RecipeInput>({
     resolver: zodResolver(recipeSchema),
     defaultValues: EMPTY_VALUES,
@@ -132,9 +141,49 @@ export default function RecipeEditorScreen() {
   const photoPreviewUrl = useRecipePhotoUrl(pickedPhoto ? null : existingPhotoPath);
   const displayedPhotoUri = pickedPhoto?.uri ?? photoPreviewUrl;
 
-  const handlePickPhoto = async () => {
-    const photo = await pickPhoto();
-    if (photo) setPickedPhoto(photo);
+  const handlePickPhoto = () => {
+    Alert.alert('Foto da ficha', undefined, [
+      { text: 'Cancelar', style: 'cancel' },
+      {
+        text: 'Tirar foto',
+        onPress: async () => {
+          const photo = await takePhoto();
+          if (photo) setPickedPhoto(photo);
+        },
+      },
+      {
+        text: 'Escolher da galeria',
+        onPress: async () => {
+          const photo = await pickPhoto();
+          if (photo) setPickedPhoto(photo);
+        },
+      },
+    ]);
+  };
+
+  const handleRemovePhoto = () => {
+    Alert.alert('Remover foto', 'A foto vai ser removida da ficha. Continuar?', [
+      { text: 'Cancelar', style: 'cancel' },
+      {
+        text: 'Remover',
+        style: 'destructive',
+        onPress: async () => {
+          if (pickedPhoto) {
+            // Ainda nem foi salva — só limpa o estado local.
+            setPickedPhoto(null);
+            return;
+          }
+          if (existingPhotoPath && !isNew) {
+            try {
+              await removeRecipePhoto(params.id);
+              setExistingPhotoPath(null);
+            } catch (error) {
+              Alert.alert('Não foi possível remover', error instanceof Error ? error.message : 'Tente novamente.');
+            }
+          }
+        },
+      },
+    ]);
   };
 
   // Custo/CMV ao vivo (07.2) — recalcula a cada tecla, sem precisar salvar.
@@ -182,11 +231,20 @@ export default function RecipeEditorScreen() {
       // trava o salvamento da ficha (ver costSnapshot.ts).
       await saveCostSnapshot(id, cmv, data.salePrice);
 
+      // Zera isDirty (mantendo os valores exibidos) antes de voltar, pra
+      // esse mesmo router.back() não reabrir o aviso de "sair sem
+      // salvar" — ver useConfirmDiscardChanges.
+      reset(getValues());
       router.back();
     } catch (error) {
       setFormError(error instanceof Error ? error.message : 'Não foi possível salvar a ficha.');
     }
   };
+
+  // pickedPhoto é state à parte (não é campo do react-hook-form) — conta
+  // como mudança não salva também, senão trocar só a foto e sair não
+  // dispararia o aviso.
+  useConfirmDiscardChanges(isDirty || !!pickedPhoto, handleSubmit(onSubmit));
 
   const handleArchive = () => {
     if (isNew) return;
@@ -297,7 +355,8 @@ export default function RecipeEditorScreen() {
                 accessibilityRole="button"
                 accessibilityLabel="Remover ingrediente"
                 onPress={() => remove(index)}
-                className="mt-9 h-11 w-11 items-center justify-center"
+                disabled={!canWrite}
+                className={'mt-9 h-11 w-11 items-center justify-center' + (canWrite ? '' : ' opacity-0')}
               >
                 <Text className="text-lg text-red-600">✕</Text>
               </Pressable>
@@ -305,14 +364,23 @@ export default function RecipeEditorScreen() {
           </View>
         );
       })}
-      <View className="mb-4">
-        <PrimaryButton
-          label="+ Adicionar ingrediente"
-          variant="outline"
-          onPress={() => append({ ingredientName: '', quantity: 0, unit: 'un', ingredientId: '' })}
-        />
-      </View>
+      {canWrite ? (
+        <View className="mb-4">
+          <PrimaryButton
+            label="+ Adicionar ingrediente"
+            variant="outline"
+            onPress={() => append({ ingredientName: '', quantity: 0, unit: 'un', ingredientId: '' })}
+          />
+        </View>
+      ) : null}
 
+      {/* Custo/CMV/preço sugerido são dado financeiro (V2, história 08.3)
+          — só proprietario/gerente veem essa seção inteira; bartender/
+          cozinheiro/visualizador nem chegam a saber o custo do que
+          editam. Reforça na interface o que a RLS de ingredients já
+          bloqueia de verdade (listInventoryItems volta vazio pra eles). */}
+      {canSeePricing ? (
+        <>
       <FormField
         control={control}
         name="salePrice"
@@ -403,9 +471,11 @@ export default function RecipeEditorScreen() {
           </View>
         </View>
       ) : null}
+        </>
+      ) : null}
 
       <FormField control={control} name="category" label="Categoria (opcional)" />
-      <FormField control={control} name="yieldAmount" label="Rendimento (ex.: 1 dose, 4 porções)" />
+      <FormField control={control} name="yieldAmount" label="Rendimento" placeholder="Ex.: 1 dose, 4 porções" />
 
       {type === 'bar' ? (
         <>
@@ -436,26 +506,41 @@ export default function RecipeEditorScreen() {
       />
 
       <Text className="mb-3 mt-2 text-base font-semibold text-gray-900 dark:text-gray-50">Foto (opcional)</Text>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Escolher foto"
-        onPress={handlePickPhoto}
-        className="mb-4 h-40 items-center justify-center overflow-hidden rounded-2xl border border-dashed border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-950"
-      >
+      <View className="relative mb-4">
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Escolher foto"
+          onPress={handlePickPhoto}
+          className="h-40 items-center justify-center overflow-hidden rounded-2xl border border-dashed border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-950"
+        >
+          {displayedPhotoUri ? (
+            <Image source={{ uri: displayedPhotoUri }} className="h-full w-full" resizeMode="cover" />
+          ) : (
+            <Text className="text-sm text-gray-500 dark:text-gray-400">Toque para tirar ou escolher uma foto</Text>
+          )}
+        </Pressable>
         {displayedPhotoUri ? (
-          <Image source={{ uri: displayedPhotoUri }} className="h-full w-full" resizeMode="cover" />
-        ) : (
-          <Text className="text-sm text-gray-500 dark:text-gray-400">Toque para adicionar uma foto</Text>
-        )}
-      </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Remover foto"
+            onPress={handleRemovePhoto}
+            className="absolute right-2 top-2 h-9 w-9 items-center justify-center rounded-full bg-black/60"
+          >
+            <Text className="text-base text-white">✕</Text>
+          </Pressable>
+        ) : null}
+      </View>
 
       {formError ? <Text className="mb-4 text-sm text-red-600">{formError}</Text> : null}
 
-      <View className="mb-3">
-        <PrimaryButton label="Salvar ficha" onPress={handleSubmit(onSubmit)} loading={isSubmitting} />
-      </View>
-
-      {!isNew ? <PrimaryButton label="Arquivar ficha" variant="outline" onPress={handleArchive} /> : null}
+      {canWrite ? (
+        <>
+          <View className="mb-3">
+            <PrimaryButton label="Salvar ficha" onPress={handleSubmit(onSubmit)} loading={isSubmitting} />
+          </View>
+          {!isNew ? <PrimaryButton label="Arquivar ficha" variant="outline" onPress={handleArchive} /> : null}
+        </>
+      ) : null}
     </KeyboardAvoidingScreen>
   );
 }

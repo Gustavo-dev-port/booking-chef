@@ -13,7 +13,13 @@ const BUCKET = 'product-photos';
 
 export type PickedPhoto = { uri: string; mimeType: string };
 
-/** Pede permissão e abre o seletor de imagens. Retorna null se cancelado/negado. */
+function toPickedPhoto(result: ImagePicker.ImagePickerResult): PickedPhoto | null {
+  if (result.canceled || !result.assets || result.assets.length === 0) return null;
+  const asset = result.assets[0];
+  return { uri: asset.uri, mimeType: asset.mimeType ?? 'image/jpeg' };
+}
+
+/** Pede permissão e abre o seletor de imagens (galeria). Retorna null se cancelado/negado. */
 export async function pickPhoto(): Promise<PickedPhoto | null> {
   const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
   if (!permission.granted) {
@@ -28,10 +34,24 @@ export async function pickPhoto(): Promise<PickedPhoto | null> {
     quality: 0.7,
   });
 
-  if (result.canceled || !result.assets || result.assets.length === 0) return null;
+  return toPickedPhoto(result);
+}
 
-  const asset = result.assets[0];
-  return { uri: asset.uri, mimeType: asset.mimeType ?? 'image/jpeg' };
+/** Pede permissão e abre a câmera. Retorna null se cancelado/negado. */
+export async function takePhoto(): Promise<PickedPhoto | null> {
+  const permission = await ImagePicker.requestCameraPermissionsAsync();
+  if (!permission.granted) {
+    Alert.alert('Permissão necessária', 'Autorize o acesso à câmera para tirar uma foto.');
+    return null;
+  }
+
+  const result = await ImagePicker.launchCameraAsync({
+    allowsEditing: true,
+    aspect: [4, 3],
+    quality: 0.7,
+  });
+
+  return toPickedPhoto(result);
 }
 
 /** @returns o `photo_path` gravado em `products.photo_path`. */
@@ -50,6 +70,17 @@ export async function uploadRecipePhoto(
   });
   if (error) throw new Error(error.message);
   return path;
+}
+
+/**
+ * Remove a foto da ficha (pedido do usuário: dá pra trocar de ideia
+ * depois de já ter salvado uma foto, não só antes). Só desvincula
+ * `photo_path` — não apaga o arquivo do Storage, mesmo princípio de
+ * exclusão lógica usado no resto do app (nunca perder dado à toa).
+ */
+export async function removeRecipePhoto(id: string): Promise<void> {
+  const { error } = await supabase.from('products').update({ photo_path: null }).eq('id', id);
+  if (error) throw new Error(error.message);
 }
 
 export async function getRecipePhotoUrl(path: string): Promise<string | null> {

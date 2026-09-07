@@ -1,11 +1,19 @@
 import { useCallback, useMemo, useState } from 'react';
-import { FlatList, Pressable, RefreshControl, Text, TextInput, View } from 'react-native';
-import { Link, useFocusEffect } from 'expo-router';
+import { Alert, FlatList, Pressable, RefreshControl, Text, TextInput, View } from 'react-native';
+import { Link, router, useFocusEffect } from 'expo-router';
 import { BackButton } from '../../../src/components/BackButton';
 import { InventoryItemCard } from '../../../src/components/InventoryItemCard';
 import { PrimaryButton } from '../../../src/components/PrimaryButton';
-import { listCategories, listInventoryItems, type InventoryItem, type NamedOption } from '../../../src/features/inventory/api';
+import {
+  archiveInventoryItem,
+  listCategories,
+  listInventoryItems,
+  type InventoryItem,
+  type NamedOption,
+} from '../../../src/features/inventory/api';
 import { useAuthStore } from '../../../src/features/auth/store';
+import { canManageBusiness, resolveAppRole } from '../../../src/features/team/permissions';
+import { useRoleGuard } from '../../../src/hooks/useRoleGuard';
 
 type FilterMode = 'all' | 'lowStock';
 
@@ -13,15 +21,26 @@ type FilterMode = 'all' | 'lowStock';
  * Lista de insumos em estoque (V2, Épico 06). Mesmo padrão de volume
  * pequeno + filtro em memória já usado na lista de fichas técnicas — ver
  * app/(app)/recipes/[type]/index.tsx.
+ *
+ * V2, história 08.3 — Estoque só pra proprietario/gerente (ver
+ * src/features/team/permissions.ts); reforça na interface o que a RLS
+ * de `ingredients` já bloqueia de verdade.
  */
 export default function InventoryListScreen() {
-  const companyId = useAuthStore((s) => s.membership?.company_id);
+  const membership = useAuthStore((s) => s.membership);
+  const companyId = membership?.company_id;
+  useRoleGuard(canManageBusiness(resolveAppRole(membership)));
 
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [categories, setCategories] = useState<NamedOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<FilterMode>('all');
+  // Seleção em massa (pedido do usuário: limpar itens duplicados/repetidos
+  // rápido, sem precisar arquivar um por um).
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [archiving, setArchiving] = useState(false);
 
   const load = useCallback(async () => {
     if (!companyId) return;
@@ -60,11 +79,61 @@ export default function InventoryListScreen() {
     });
   }, [items, search, filter]);
 
+  const toggleSelectMode = () => {
+    setSelectMode((v) => !v);
+    setSelectedIds(new Set());
+  };
+
+  const toggleSelected = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleArchiveSelected = () => {
+    const count = selectedIds.size;
+    if (count === 0) return;
+    Alert.alert(
+      'Arquivar insumos selecionados',
+      `${count} insumo${count > 1 ? 's vão' : ' vai'} sumir da lista, mas ficam preservados no histórico. Continuar?`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Arquivar',
+          style: 'destructive',
+          onPress: async () => {
+            setArchiving(true);
+            try {
+              await Promise.all(Array.from(selectedIds).map((id) => archiveInventoryItem(id)));
+              setSelectMode(false);
+              setSelectedIds(new Set());
+              await load();
+            } catch (error) {
+              Alert.alert('Não foi possível arquivar', error instanceof Error ? error.message : 'Tente novamente.');
+            } finally {
+              setArchiving(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <View className="flex-1 bg-gray-50 dark:bg-gray-950 pt-16">
       <View className="px-4">
         <BackButton />
-        <Text className="mb-4 text-2xl font-bold text-gray-900 dark:text-gray-50">Estoque</Text>
+        <View className="mb-4 flex-row items-center justify-between">
+          <Text className="text-2xl font-bold text-gray-900 dark:text-gray-50">Estoque</Text>
+          {visibleItems.length > 0 ? (
+            <Pressable accessibilityRole="button" onPress={toggleSelectMode} className="min-h-[44px] justify-center">
+              <Text className="text-sm font-medium text-blue-600">{selectMode ? 'Cancelar' : 'Selecionar'}</Text>
+            </Pressable>
+          ) : null}
+        </View>
 
         <TextInput
           accessibilityLabel="Buscar por nome"
@@ -111,11 +180,32 @@ export default function InventoryListScreen() {
         keyExtractor={(item) => item.id}
         contentContainerClassName="px-4 pb-24"
         refreshControl={<RefreshControl refreshing={loading} onRefresh={load} />}
-        renderItem={({ item }) => (
-          <Link href={`/inventory/${item.id}`} asChild>
-            <InventoryItemCard item={item} categoryName={item.category_id ? categoryNameById.get(item.category_id) ?? null : null} onPress={() => {}} />
-          </Link>
-        )}
+        renderItem={({ item }) =>
+          selectMode ? (
+            <View className="flex-row items-center gap-3">
+              <View
+                accessibilityElementsHidden
+                className={
+                  'h-6 w-6 items-center justify-center rounded-full border-2 ' +
+                  (selectedIds.has(item.id) ? 'border-blue-600 bg-blue-600' : 'border-gray-400 dark:border-gray-500')
+                }
+              >
+                {selectedIds.has(item.id) ? <Text className="text-xs font-bold text-white">✓</Text> : null}
+              </View>
+              <View className="flex-1">
+                <InventoryItemCard
+                  item={item}
+                  categoryName={item.category_id ? categoryNameById.get(item.category_id) ?? null : null}
+                  onPress={() => toggleSelected(item.id)}
+                />
+              </View>
+            </View>
+          ) : (
+            <Link href={`/inventory/${item.id}`} asChild>
+              <InventoryItemCard item={item} categoryName={item.category_id ? categoryNameById.get(item.category_id) ?? null : null} onPress={() => {}} />
+            </Link>
+          )
+        }
         ListEmptyComponent={
           !loading ? (
             <View className="mt-12 items-center px-6">
@@ -134,7 +224,16 @@ export default function InventoryListScreen() {
         }
       />
 
-      {visibleItems.length > 0 ? (
+      {selectMode ? (
+        <View className="absolute bottom-6 left-4 right-4">
+          <PrimaryButton
+            label={selectedIds.size > 0 ? `Arquivar selecionados (${selectedIds.size})` : 'Selecione um ou mais insumos'}
+            onPress={handleArchiveSelected}
+            disabled={selectedIds.size === 0}
+            loading={archiving}
+          />
+        </View>
+      ) : visibleItems.length > 0 ? (
         <Link href="/inventory/new" asChild>
           <Pressable
             accessibilityRole="button"
