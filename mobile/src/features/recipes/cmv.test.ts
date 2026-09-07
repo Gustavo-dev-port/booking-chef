@@ -1,4 +1,4 @@
-import { calculateCmv } from './cmv';
+import { calculateCmv, computeCmvStatus, cmvStatusLabel } from './cmv';
 
 describe('calculateCmv', () => {
   const costById = new Map([
@@ -53,5 +53,29 @@ describe('calculateCmv', () => {
     const result = calculateCmv([], costById, 10);
     expect(result.totalCost).toBe(0);
     expect(result.hasUnknownCost).toBe(false);
+  });
+});
+
+describe('computeCmvStatus / cmvStatusLabel', () => {
+  it('igual ou abaixo da meta (30%) é ok', () => {
+    expect(computeCmvStatus(28.1)).toBe('ok');
+    expect(computeCmvStatus(30)).toBe('ok');
+    expect(cmvStatusLabel('ok', 28.1)).toBe('abaixo da meta');
+  });
+
+  it('até 5 pontos acima da meta é attention', () => {
+    expect(computeCmvStatus(33.4)).toBe('attention');
+    expect(computeCmvStatus(35)).toBe('attention');
+    expect(cmvStatusLabel('attention', 33.4)).toBe('3.4 pp acima');
+  });
+
+  it('mais de 5 pontos acima da meta é danger', () => {
+    expect(computeCmvStatus(41.2)).toBe('danger');
+    expect(cmvStatusLabel('danger', 41.2)).toBe('margem em risco');
+  });
+
+  it('aceita uma meta customizada', () => {
+    expect(computeCmvStatus(22, 20)).toBe('attention');
+    expect(computeCmvStatus(18, 20)).toBe('ok');
   });
 });

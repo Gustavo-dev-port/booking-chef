@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 import { Link } from 'expo-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { AppText } from '../../src/components/AppText';
 import { FormField } from '../../src/components/FormField';
 import { FormChipSelect } from '../../src/components/FormChipSelect';
 import { FormCheckbox } from '../../src/components/FormCheckbox';
@@ -86,17 +87,17 @@ export default function CompanyOnboardingScreen() {
   };
 
   return (
-    <KeyboardAvoidingScreen className="flex-1 bg-white dark:bg-gray-900" contentContainerClassName="px-6 py-16">
-      <Text className="mb-1 text-2xl font-bold text-gray-900 dark:text-gray-50">Complete seu cadastro</Text>
-      <Text className="mb-6 text-base text-gray-500 dark:text-gray-400">
+    <KeyboardAvoidingScreen className="flex-1 bg-surface-card dark:bg-surface-card-dark" contentContainerClassName="px-6 py-16">
+      <AppText className="mb-1 text-2xl font-archivo-bold text-ink dark:text-ink-dark">Complete seu cadastro</AppText>
+      <AppText className="mb-6 text-base text-ink-secondary dark:text-ink-secondary-dark">
         Precisamos de mais alguns dados seus e do seu estabelecimento.
-      </Text>
+      </AppText>
 
-      <Text className="mb-3 text-base font-semibold text-gray-900 dark:text-gray-50">Você</Text>
+      <AppText className="mb-3 text-base font-archivo-semibold text-ink dark:text-ink-dark">Você</AppText>
       <FormField control={control} name="name" label="Seu nome" autoComplete="name" />
       <FormField control={control} name="phone" label="Telefone (opcional)" keyboardType="phone-pad" />
 
-      <Text className="mb-3 mt-2 text-base font-semibold text-gray-900 dark:text-gray-50">Estabelecimento</Text>
+      <AppText className="mb-3 mt-2 text-base font-archivo-semibold text-ink dark:text-ink-dark">Estabelecimento</AppText>
       <FormField control={control} name="cnpj" label="CNPJ" keyboardType="number-pad" maxLength={18} />
       <View className="mb-4">
         <PrimaryButton
@@ -105,7 +106,7 @@ export default function CompanyOnboardingScreen() {
           onPress={handleLookupCnpj}
           loading={lookingUpCnpj}
         />
-        {cnpjLookupError ? <Text className="mt-2 text-sm text-red-600">{cnpjLookupError}</Text> : null}
+        {cnpjLookupError ? <AppText className="mt-2 text-sm text-danger dark:text-danger-dark">{cnpjLookupError}</AppText> : null}
       </View>
 
       <FormField control={control} name="legalName" label="Razão social" />
@@ -122,14 +123,14 @@ export default function CompanyOnboardingScreen() {
 
       <View className="mb-1 flex-row gap-4">
         <Link href="/terms" asChild>
-          <Text className="min-h-[44px] text-sm text-blue-600" accessibilityRole="link">
+          <AppText className="min-h-[44px] text-sm text-brand dark:text-brand-dark" accessibilityRole="link">
             Ler Termos de Uso
-          </Text>
+          </AppText>
         </Link>
         <Link href="/privacy" asChild>
-          <Text className="min-h-[44px] text-sm text-blue-600" accessibilityRole="link">
+          <AppText className="min-h-[44px] text-sm text-brand dark:text-brand-dark" accessibilityRole="link">
             Ler Política de Privacidade
-          </Text>
+          </AppText>
         </Link>
       </View>
       <FormCheckbox control={control} name="termsAccepted" label="Li e aceito os Termos de Uso" />
@@ -139,7 +140,7 @@ export default function CompanyOnboardingScreen() {
         label="Quero receber novidades e ofertas por email"
       />
 
-      {formError ? <Text className="mb-4 text-sm text-red-600">{formError}</Text> : null}
+      {formError ? <AppText className="mb-4 text-sm text-danger dark:text-danger-dark">{formError}</AppText> : null}
 
       <PrimaryButton label="Concluir cadastro" onPress={handleSubmit(onSubmit)} loading={isSubmitting} />
     </KeyboardAvoidingScreen>

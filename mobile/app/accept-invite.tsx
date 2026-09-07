@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Text } from 'react-native';
 import { router } from 'expo-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { AppText } from '../src/components/AppText';
 import { FormCheckbox } from '../src/components/FormCheckbox';
 import { FormField } from '../src/components/FormField';
 import { KeyboardAvoidingScreen } from '../src/components/KeyboardAvoidingScreen';
@@ -49,11 +49,11 @@ export default function AcceptInviteScreen() {
   };
 
   return (
-    <KeyboardAvoidingScreen className="flex-1 bg-white dark:bg-gray-900" contentContainerClassName="flex-grow justify-center px-6 py-12">
-      <Text className="mb-3 text-2xl font-bold text-gray-900 dark:text-gray-50">Você foi convidado!</Text>
-      <Text className="mb-6 text-base text-gray-500 dark:text-gray-400">
+    <KeyboardAvoidingScreen className="flex-1 bg-surface-card dark:bg-surface-card-dark" contentContainerClassName="flex-grow justify-center px-6 py-12">
+      <AppText className="mb-3 text-2xl font-archivo-bold text-ink dark:text-ink-dark">Você foi convidado!</AppText>
+      <AppText className="mb-6 text-base text-ink-secondary dark:text-ink-secondary-dark">
         Crie uma senha para acessar o Booking Chef do estabelecimento que te convidou.
-      </Text>
+      </AppText>
 
       <FormField
         control={control}
@@ -74,7 +74,7 @@ export default function AcceptInviteScreen() {
       />
       <FormCheckbox control={control} name="termsAccepted" label="Li e aceito os Termos de Uso" />
 
-      {formError ? <Text className="mb-4 text-sm text-red-600">{formError}</Text> : null}
+      {formError ? <AppText className="mb-4 text-sm text-danger dark:text-danger-dark">{formError}</AppText> : null}
 
       <PrimaryButton label="Ativar acesso" onPress={handleSubmit(onSubmit)} loading={isSubmitting} />
     </KeyboardAvoidingScreen>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Pressable, Text, TextInput, View, type TextInputProps } from 'react-native';
+import { Pressable, TextInput, View, type TextInputProps } from 'react-native';
 import { Controller, type Control, type FieldValues, type Path } from 'react-hook-form';
+import { AppText } from './AppText';
 
 type FormFieldProps<T extends FieldValues> = TextInputProps & {
   control: Control<T>;
@@ -34,7 +35,7 @@ export function FormField<T extends FieldValues>({
       name={name}
       render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
         <View className="mb-4">
-          <Text className="mb-1 text-base text-gray-700 dark:text-gray-300">{label}</Text>
+          <AppText className="mb-1 font-archivo-semibold text-base text-ink dark:text-ink-dark">{label}</AppText>
           <View className="relative justify-center">
             <TextInput
               accessibilityLabel={label}
@@ -42,10 +43,11 @@ export function FormField<T extends FieldValues>({
               onChangeText={onChange}
               value={value === undefined || value === null ? '' : String(value)}
               secureTextEntry={showPasswordToggle ? !revealed : secureTextEntry}
+              placeholderTextColor="#A6937F"
               className={
-                'min-h-[44px] rounded-xl border px-4 text-base text-gray-900 dark:text-gray-50 ' +
+                'min-h-[48px] rounded-2xl border bg-surface-card px-4 font-archivo text-base text-ink focus:border-[1.5px] focus:border-brand dark:bg-surface-card-dark dark:text-ink-dark dark:focus:border-brand-dark ' +
                 (showPasswordToggle ? 'pr-20 ' : '') +
-                (error ? 'border-red-500' : 'border-gray-300 dark:border-gray-700')
+                (error ? 'border-danger dark:border-danger-dark' : 'border-surface-input-border dark:border-surface-border-dark')
               }
               {...inputProps}
             />
@@ -56,14 +58,14 @@ export function FormField<T extends FieldValues>({
                 onPress={() => setRevealed((v) => !v)}
                 className="absolute right-2 h-11 items-center justify-center px-2"
               >
-                <Text className="text-sm font-medium text-blue-600">{revealed ? 'Ocultar' : 'Mostrar'}</Text>
+                <AppText className="text-sm font-archivo-medium text-brand dark:text-brand-dark">{revealed ? 'Ocultar' : 'Mostrar'}</AppText>
               </Pressable>
             ) : null}
           </View>
           {error?.message ? (
-            <Text className="mt-1 text-sm text-red-600">{error.message}</Text>
+            <AppText className="mt-1 text-sm text-danger dark:text-danger-dark">{error.message}</AppText>
           ) : hint ? (
-            <Text className="mt-1 text-sm text-gray-500 dark:text-gray-400">{hint}</Text>
+            <AppText className="mt-1 text-sm text-ink-secondary dark:text-ink-secondary-dark">{hint}</AppText>
           ) : null}
         </View>
       )}

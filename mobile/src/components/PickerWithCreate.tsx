@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Pressable, Text, TextInput, View } from 'react-native';
+import { Pressable, TextInput, View } from 'react-native';
 import { Controller, type Control, type FieldValues, type Path } from 'react-hook-form';
+import { AppText } from './AppText';
 
 type Option = { id: string; name: string };
 
@@ -38,7 +39,7 @@ export function PickerWithCreate<T extends FieldValues>({
       name={name}
       render={({ field: { onChange, value }, fieldState: { error } }) => (
         <View className="mb-4">
-          <Text className="mb-1 text-base text-gray-700 dark:text-gray-300">{label}</Text>
+          <AppText className="mb-1 text-base text-ink dark:text-ink-dark">{label}</AppText>
           <View className="flex-row flex-wrap gap-2">
             {options.map((option) => {
               const selected = value === option.id;
@@ -52,17 +53,17 @@ export function PickerWithCreate<T extends FieldValues>({
                   className={
                     'min-h-[44px] items-center justify-center rounded-full border px-4 py-2 ' +
                     (selected
-                      ? 'border-blue-600 bg-blue-600'
-                      : 'border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900')
+                      ? 'border-brand dark:border-brand-dark bg-brand dark:bg-brand-dark'
+                      : 'border-surface-input-border dark:border-surface-border-dark bg-surface-card dark:bg-surface-card-dark')
                   }
                 >
-                  <Text
+                  <AppText
                     className={
-                      selected ? 'text-sm font-semibold text-white' : 'text-sm text-gray-700 dark:text-gray-300'
+                      selected ? 'text-sm font-archivo-semibold text-white' : 'text-sm text-ink dark:text-ink-dark'
                     }
                   >
                     {option.name}
-                  </Text>
+                  </AppText>
                 </Pressable>
               );
             })}
@@ -70,12 +71,12 @@ export function PickerWithCreate<T extends FieldValues>({
               accessibilityRole="button"
               accessibilityLabel={`Nova opção de ${label.toLowerCase()}`}
               onPress={() => setCreating(true)}
-              className="min-h-[44px] items-center justify-center rounded-full border border-dashed border-gray-400 dark:border-gray-600 px-4 py-2"
+              className="min-h-[44px] items-center justify-center rounded-full border border-dashed border-surface-input-border dark:border-surface-border-dark px-4 py-2"
             >
-              <Text className="text-sm text-gray-500 dark:text-gray-400">+ Nova</Text>
+              <AppText className="text-sm text-ink-secondary dark:text-ink-secondary-dark">+ Nova</AppText>
             </Pressable>
           </View>
-          {error?.message ? <Text className="mt-1 text-sm text-red-600">{error.message}</Text> : null}
+          {error?.message ? <AppText className="mt-1 text-sm text-danger dark:text-danger-dark">{error.message}</AppText> : null}
 
           {creating ? (
             <View className="mt-2 flex-row items-center gap-2">
@@ -85,7 +86,7 @@ export function PickerWithCreate<T extends FieldValues>({
                 onChangeText={setNewName}
                 placeholder={`Nome`}
                 accessibilityLabel={`Nome da nova ${label.toLowerCase()}`}
-                className="min-h-[44px] flex-1 rounded-xl border border-gray-300 dark:border-gray-700 px-4 text-base text-gray-900 dark:text-gray-50"
+                className="min-h-[44px] flex-1 rounded-xl border border-surface-input-border dark:border-surface-border-dark px-4 text-base text-ink dark:text-ink-dark"
               />
               <Pressable
                 accessibilityRole="button"
@@ -104,9 +105,9 @@ export function PickerWithCreate<T extends FieldValues>({
                     setSaving(false);
                   }
                 }}
-                className="h-11 w-11 items-center justify-center rounded-xl bg-blue-600"
+                className="h-11 w-11 items-center justify-center rounded-xl bg-brand dark:bg-brand-dark"
               >
-                <Text className="text-lg text-white">✓</Text>
+                <AppText className="text-lg text-white">✓</AppText>
               </Pressable>
             </View>
           ) : null}

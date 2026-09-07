@@ -1,5 +1,6 @@
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { Controller, type Control, type FieldValues, type Path } from 'react-hook-form';
+import { AppText } from './AppText';
 
 type Option = { value: string; label: string };
 
@@ -22,7 +23,7 @@ export function FormChipSelect<T extends FieldValues>({ control, name, label, op
       name={name}
       render={({ field: { onChange, value }, fieldState: { error } }) => (
         <View className="mb-4">
-          <Text className="mb-1 text-base text-gray-700 dark:text-gray-300">{label}</Text>
+          <AppText className="mb-1 text-base text-ink dark:text-ink-dark">{label}</AppText>
           <View className="flex-row flex-wrap gap-2">
             {options.map((option) => {
               const selected = value === option.value;
@@ -35,17 +36,17 @@ export function FormChipSelect<T extends FieldValues>({ control, name, label, op
                   onPress={() => onChange(option.value)}
                   className={
                     'min-h-[44px] items-center justify-center rounded-full border px-4 py-2 ' +
-                    (selected ? 'border-blue-600 bg-blue-600' : 'border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900')
+                    (selected ? 'border-brand dark:border-brand-dark bg-brand dark:bg-brand-dark' : 'border-surface-input-border dark:border-surface-border-dark bg-surface-card dark:bg-surface-card-dark')
                   }
                 >
-                  <Text className={selected ? 'text-sm font-semibold text-white' : 'text-sm text-gray-700 dark:text-gray-300'}>
+                  <AppText className={selected ? 'text-sm font-archivo-semibold text-white' : 'text-sm text-ink dark:text-ink-dark'}>
                     {option.label}
-                  </Text>
+                  </AppText>
                 </Pressable>
               );
             })}
           </View>
-          {error?.message ? <Text className="mt-1 text-sm text-red-600">{error.message}</Text> : null}
+          {error?.message ? <AppText className="mt-1 text-sm text-danger dark:text-danger-dark">{error.message}</AppText> : null}
         </View>
       )}
     />

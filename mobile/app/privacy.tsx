@@ -1,5 +1,6 @@
-import { ScrollView, Text, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
+import { AppText } from '../src/components/AppText';
 import { BackButton } from '../src/components/BackButton';
 import { PrimaryButton } from '../src/components/PrimaryButton';
 
@@ -9,47 +10,47 @@ import { PrimaryButton } from '../src/components/PrimaryButton';
  */
 export default function PrivacyScreen() {
   return (
-    <ScrollView className="flex-1 bg-white dark:bg-gray-900" contentContainerClassName="px-6 py-16">
+    <ScrollView className="flex-1 bg-surface-card dark:bg-surface-card-dark" contentContainerClassName="px-6 py-16">
       <BackButton />
-      <Text className="mb-1 text-2xl font-bold text-gray-900 dark:text-gray-50">Política de Privacidade</Text>
-      <View className="mb-6 rounded-xl bg-amber-50 dark:bg-amber-950 px-4 py-3">
-        <Text className="text-sm text-amber-800 dark:text-amber-200">
+      <AppText className="mb-1 text-2xl font-archivo-bold text-ink dark:text-ink-dark">Política de Privacidade</AppText>
+      <View className="mb-6 rounded-xl bg-warning-bg dark:bg-surface-border-dark px-4 py-3">
+        <AppText className="text-sm text-warning-text dark:text-warning-dark">
           Texto placeholder — ainda não revisado por advogado. Substituir antes de qualquer publicação
           real do app.
-        </Text>
+        </AppText>
       </View>
 
-      <Text className="mb-2 text-base font-semibold text-gray-900 dark:text-gray-50">Quais dados coletamos</Text>
-      <Text className="mb-4 text-base leading-6 text-gray-700 dark:text-gray-300">
+      <AppText className="mb-2 text-base font-archivo-semibold text-ink dark:text-ink-dark">Quais dados coletamos</AppText>
+      <AppText className="mb-4 text-base leading-6 text-ink dark:text-ink-dark">
         Nome, e-mail e telefone (opcional) do usuário; CNPJ, razão social, nome fantasia, segmento,
         cidade e estado do estabelecimento; e o conteúdo que você cadastra (fichas técnicas,
         ingredientes, fotos).
-      </Text>
+      </AppText>
 
-      <Text className="mb-2 text-base font-semibold text-gray-900 dark:text-gray-50">Como usamos</Text>
-      <Text className="mb-4 text-base leading-6 text-gray-700 dark:text-gray-300">
+      <AppText className="mb-2 text-base font-archivo-semibold text-ink dark:text-ink-dark">Como usamos</AppText>
+      <AppText className="mb-4 text-base leading-6 text-ink dark:text-ink-dark">
         Só para operar o App: autenticar sua conta, associar o conteúdo ao seu estabelecimento e gerar
         os PDFs de booking que você solicitar. Não vendemos nem compartilhamos seus dados com
         terceiros para fins de marketing.
-      </Text>
+      </AppText>
 
-      <Text className="mb-2 text-base font-semibold text-gray-900 dark:text-gray-50">Onde ficam armazenados</Text>
-      <Text className="mb-4 text-base leading-6 text-gray-700 dark:text-gray-300">
+      <AppText className="mb-2 text-base font-archivo-semibold text-ink dark:text-ink-dark">Onde ficam armazenados</AppText>
+      <AppText className="mb-4 text-base leading-6 text-ink dark:text-ink-dark">
         Banco de dados e armazenamento de arquivos do Supabase, com controle de acesso por empresa
         (Row Level Security) — cada estabelecimento só enxerga os próprios dados.
-      </Text>
+      </AppText>
 
-      <Text className="mb-2 text-base font-semibold text-gray-900 dark:text-gray-50">Seus direitos (LGPD)</Text>
-      <Text className="mb-4 text-base leading-6 text-gray-700 dark:text-gray-300">
+      <AppText className="mb-2 text-base font-archivo-semibold text-ink dark:text-ink-dark">Seus direitos (LGPD)</AppText>
+      <AppText className="mb-4 text-base leading-6 text-ink dark:text-ink-dark">
         Você pode acessar, corrigir ou excluir seus dados a qualquer momento. A exclusão de conta
         (tela de Perfil) apaga permanentemente seu usuário, seu estabelecimento e todo o conteúdo
         associado — inclusive fotos — de forma irreversível.
-      </Text>
+      </AppText>
 
-      <Text className="mb-8 text-base leading-6 text-gray-700 dark:text-gray-300">
+      <AppText className="mb-8 text-base leading-6 text-ink dark:text-ink-dark">
         Dúvidas sobre privacidade podem ser encaminhadas para o suporte do estabelecimento responsável
         pelo App.
-      </Text>
+      </AppText>
 
       <PrimaryButton label="Voltar" variant="outline" onPress={() => router.back()} />
     </ScrollView>

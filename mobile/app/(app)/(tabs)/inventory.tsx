@@ -1,7 +1,8 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Alert, FlatList, Pressable, RefreshControl, Text, TextInput, View } from 'react-native';
+import { Alert, FlatList, Pressable, RefreshControl, TextInput, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Link, router, useFocusEffect } from 'expo-router';
-import { BackButton } from '../../../src/components/BackButton';
+import { AppText } from '../../../src/components/AppText';
 import { InventoryItemCard } from '../../../src/components/InventoryItemCard';
 import { PrimaryButton } from '../../../src/components/PrimaryButton';
 import {
@@ -14,6 +15,7 @@ import {
 import { useAuthStore } from '../../../src/features/auth/store';
 import { canManageBusiness, resolveAppRole } from '../../../src/features/team/permissions';
 import { useRoleGuard } from '../../../src/hooks/useRoleGuard';
+import { listEntranceDelay } from '../../../src/features/ui/listEntrance';
 
 type FilterMode = 'all' | 'lowStock';
 
@@ -123,14 +125,13 @@ export default function InventoryListScreen() {
   };
 
   return (
-    <View className="flex-1 bg-gray-50 dark:bg-gray-950 pt-16">
+    <View className="flex-1 bg-surface-page dark:bg-surface-page-dark pt-16">
       <View className="px-4">
-        <BackButton />
         <View className="mb-4 flex-row items-center justify-between">
-          <Text className="text-2xl font-bold text-gray-900 dark:text-gray-50">Estoque</Text>
+          <AppText className="text-2xl font-archivo-bold text-ink dark:text-ink-dark">Estoque</AppText>
           {visibleItems.length > 0 ? (
             <Pressable accessibilityRole="button" onPress={toggleSelectMode} className="min-h-[44px] justify-center">
-              <Text className="text-sm font-medium text-blue-600">{selectMode ? 'Cancelar' : 'Selecionar'}</Text>
+              <AppText className="text-sm font-archivo-medium text-brand dark:text-brand-dark">{selectMode ? 'Cancelar' : 'Selecionar'}</AppText>
             </Pressable>
           ) : null}
         </View>
@@ -140,7 +141,7 @@ export default function InventoryListScreen() {
           placeholder="Buscar por nome"
           value={search}
           onChangeText={setSearch}
-          className="mb-3 min-h-[44px] rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 text-base text-gray-900 dark:text-gray-50"
+          className="mb-3 min-h-[44px] rounded-xl border border-surface-input-border dark:border-surface-border-dark bg-surface-card dark:bg-surface-card-dark px-4 text-base text-ink dark:text-ink-dark"
         />
 
         <View className="mb-3 flex-row gap-2">
@@ -151,12 +152,12 @@ export default function InventoryListScreen() {
             onPress={() => setFilter('all')}
             className={
               'min-h-[44px] flex-1 items-center justify-center rounded-full border px-3 py-2 ' +
-              (filter === 'all' ? 'border-blue-600 bg-blue-600' : 'border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900')
+              (filter === 'all' ? 'border-brand dark:border-brand-dark bg-brand dark:bg-brand-dark' : 'border-surface-input-border dark:border-surface-border-dark bg-surface-card dark:bg-surface-card-dark')
             }
           >
-            <Text className={filter === 'all' ? 'text-sm font-semibold text-white' : 'text-sm text-gray-700 dark:text-gray-300'}>
+            <AppText className={filter === 'all' ? 'text-sm font-archivo-semibold text-white' : 'text-sm text-ink dark:text-ink-dark'}>
               Todos
-            </Text>
+            </AppText>
           </Pressable>
           <Pressable
             accessibilityRole="radio"
@@ -165,12 +166,12 @@ export default function InventoryListScreen() {
             onPress={() => setFilter('lowStock')}
             className={
               'min-h-[44px] flex-1 items-center justify-center rounded-full border px-3 py-2 ' +
-              (filter === 'lowStock' ? 'border-red-600 bg-red-600' : 'border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900')
+              (filter === 'lowStock' ? 'border-danger dark:border-danger-dark bg-danger dark:bg-danger-dark' : 'border-surface-input-border dark:border-surface-border-dark bg-surface-card dark:bg-surface-card-dark')
             }
           >
-            <Text className={filter === 'lowStock' ? 'text-sm font-semibold text-white' : 'text-sm text-gray-700 dark:text-gray-300'}>
+            <AppText className={filter === 'lowStock' ? 'text-sm font-archivo-semibold text-white' : 'text-sm text-ink dark:text-ink-dark'}>
               Abaixo do mínimo{lowStockCount > 0 ? ` (${lowStockCount})` : ''}
-            </Text>
+            </AppText>
           </Pressable>
         </View>
       </View>
@@ -180,40 +181,42 @@ export default function InventoryListScreen() {
         keyExtractor={(item) => item.id}
         contentContainerClassName="px-4 pb-24"
         refreshControl={<RefreshControl refreshing={loading} onRefresh={load} />}
-        renderItem={({ item }) =>
-          selectMode ? (
-            <View className="flex-row items-center gap-3">
-              <View
-                accessibilityElementsHidden
-                className={
-                  'h-6 w-6 items-center justify-center rounded-full border-2 ' +
-                  (selectedIds.has(item.id) ? 'border-blue-600 bg-blue-600' : 'border-gray-400 dark:border-gray-500')
-                }
-              >
-                {selectedIds.has(item.id) ? <Text className="text-xs font-bold text-white">✓</Text> : null}
+        renderItem={({ item, index }) => (
+          <Animated.View entering={FadeInDown.delay(listEntranceDelay(index)).duration(220)}>
+            {selectMode ? (
+              <View className="flex-row items-center gap-3">
+                <View
+                  accessibilityElementsHidden
+                  className={
+                    'h-6 w-6 items-center justify-center rounded-full border-2 ' +
+                    (selectedIds.has(item.id) ? 'border-brand dark:border-brand-dark bg-brand dark:bg-brand-dark' : 'border-surface-input-border dark:border-surface-border-dark')
+                  }
+                >
+                  {selectedIds.has(item.id) ? <AppText className="text-xs font-archivo-bold text-white">✓</AppText> : null}
+                </View>
+                <View className="flex-1">
+                  <InventoryItemCard
+                    item={item}
+                    categoryName={item.category_id ? categoryNameById.get(item.category_id) ?? null : null}
+                    onPress={() => toggleSelected(item.id)}
+                  />
+                </View>
               </View>
-              <View className="flex-1">
-                <InventoryItemCard
-                  item={item}
-                  categoryName={item.category_id ? categoryNameById.get(item.category_id) ?? null : null}
-                  onPress={() => toggleSelected(item.id)}
-                />
-              </View>
-            </View>
-          ) : (
-            <Link href={`/inventory/${item.id}`} asChild>
-              <InventoryItemCard item={item} categoryName={item.category_id ? categoryNameById.get(item.category_id) ?? null : null} onPress={() => {}} />
-            </Link>
-          )
-        }
+            ) : (
+              <Link href={`/inventory/${item.id}`} asChild>
+                <InventoryItemCard item={item} categoryName={item.category_id ? categoryNameById.get(item.category_id) ?? null : null} onPress={() => {}} />
+              </Link>
+            )}
+          </Animated.View>
+        )}
         ListEmptyComponent={
           !loading ? (
             <View className="mt-12 items-center px-6">
-              <Text className="mb-4 text-center text-base text-gray-500 dark:text-gray-400">
+              <AppText className="mb-4 text-center text-base text-ink-secondary dark:text-ink-secondary-dark">
                 {filter === 'lowStock'
                   ? 'Nenhum insumo abaixo do mínimo — tudo em dia.'
                   : 'Você ainda não possui nenhum insumo cadastrado'}
-              </Text>
+              </AppText>
               {filter === 'all' ? (
                 <Link href="/inventory/new" asChild>
                   <PrimaryButton label="Cadastrar primeiro insumo" />
@@ -238,9 +241,9 @@ export default function InventoryListScreen() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Cadastrar novo insumo"
-            className="absolute bottom-6 right-6 h-14 w-14 items-center justify-center rounded-full bg-blue-600 shadow-lg active:bg-blue-700"
+            className="absolute bottom-6 right-6 h-14 w-14 items-center justify-center rounded-full bg-brand dark:bg-brand-dark shadow-lg active:bg-brand-pressed dark:active:bg-brand-dark"
           >
-            <Text className="text-2xl text-white">+</Text>
+            <AppText className="text-2xl text-white">+</AppText>
           </Pressable>
         </Link>
       ) : null}

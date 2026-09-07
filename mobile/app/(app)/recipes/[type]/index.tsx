@@ -1,6 +1,8 @@
 import { useCallback, useMemo, useState } from 'react';
-import { FlatList, Pressable, RefreshControl, Text, TextInput, View } from 'react-native';
+import { FlatList, Pressable, RefreshControl, TextInput, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Link, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { AppText } from '../../../../src/components/AppText';
 import { BackButton } from '../../../../src/components/BackButton';
 import { RecipeCard } from '../../../../src/components/RecipeCard';
 import { PrimaryButton } from '../../../../src/components/PrimaryButton';
@@ -9,6 +11,7 @@ import { useAuthStore } from '../../../../src/features/auth/store';
 import { canAccessRecipeType, canWriteRecipes, resolveAppRole } from '../../../../src/features/team/permissions';
 import { useRoleGuard } from '../../../../src/hooks/useRoleGuard';
 import { isRecipeType, RECIPE_TYPE_LABELS } from '../../../../src/validators/recipe';
+import { listEntranceDelay } from '../../../../src/features/ui/listEntrance';
 
 type SortMode = 'name' | 'recent';
 
@@ -73,17 +76,17 @@ export default function RecipeListScreen() {
   }, [recipes, search, category, sort]);
 
   return (
-    <View className="flex-1 bg-gray-50 dark:bg-gray-950 pt-16">
+    <View className="flex-1 bg-surface-page dark:bg-surface-page-dark pt-16">
       <View className="px-4">
         <BackButton />
-        <Text className="mb-4 text-2xl font-bold text-gray-900 dark:text-gray-50">{RECIPE_TYPE_LABELS[type]}</Text>
+        <AppText className="mb-4 text-2xl font-archivo-bold text-ink dark:text-ink-dark">{RECIPE_TYPE_LABELS[type]}</AppText>
 
         <TextInput
           accessibilityLabel="Buscar por nome"
           placeholder="Buscar por nome"
           value={search}
           onChangeText={setSearch}
-          className="mb-3 min-h-[44px] rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 text-base"
+          className="mb-3 min-h-[44px] rounded-xl border border-surface-input-border dark:border-surface-border-dark bg-surface-card dark:bg-surface-card-dark px-4 text-base"
         />
 
         {categories.length > 0 ? (
@@ -95,12 +98,12 @@ export default function RecipeListScreen() {
               onPress={() => setCategory(null)}
               className={
                 'min-h-[44px] items-center justify-center rounded-full border px-3 py-1 ' +
-                (category === null ? 'border-blue-600 bg-blue-600' : 'border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900')
+                (category === null ? 'border-brand dark:border-brand-dark bg-brand dark:bg-brand-dark' : 'border-surface-input-border dark:border-surface-border-dark bg-surface-card dark:bg-surface-card-dark')
               }
             >
-              <Text className={category === null ? 'text-sm font-semibold text-white' : 'text-sm text-gray-700 dark:text-gray-300'}>
+              <AppText className={category === null ? 'text-sm font-archivo-semibold text-white' : 'text-sm text-ink dark:text-ink-dark'}>
                 Todas
-              </Text>
+              </AppText>
             </Pressable>
             {categories.map((c) => (
               <Pressable
@@ -111,19 +114,19 @@ export default function RecipeListScreen() {
                 onPress={() => setCategory(c)}
                 className={
                   'min-h-[44px] items-center justify-center rounded-full border px-3 py-1 ' +
-                  (category === c ? 'border-blue-600 bg-blue-600' : 'border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900')
+                  (category === c ? 'border-brand dark:border-brand-dark bg-brand dark:bg-brand-dark' : 'border-surface-input-border dark:border-surface-border-dark bg-surface-card dark:bg-surface-card-dark')
                 }
               >
-                <Text className={category === c ? 'text-sm font-semibold text-white' : 'text-sm text-gray-700 dark:text-gray-300'}>
+                <AppText className={category === c ? 'text-sm font-archivo-semibold text-white' : 'text-sm text-ink dark:text-ink-dark'}>
                   {c}
-                </Text>
+                </AppText>
               </Pressable>
             ))}
           </View>
         ) : null}
 
         <View className="mb-3 flex-row items-center gap-2">
-          <Text className="text-sm text-gray-500 dark:text-gray-400">Ordenar:</Text>
+          <AppText className="text-sm text-ink-secondary dark:text-ink-secondary-dark">Ordenar:</AppText>
           <Pressable
             accessibilityRole="radio"
             accessibilityLabel="Ordenar por mais recentes"
@@ -131,11 +134,11 @@ export default function RecipeListScreen() {
             onPress={() => setSort('recent')}
             className="min-h-[44px] justify-center"
           >
-            <Text className={sort === 'recent' ? 'text-sm font-semibold text-blue-600' : 'text-sm text-gray-500 dark:text-gray-400'}>
+            <AppText className={sort === 'recent' ? 'text-sm font-archivo-semibold text-brand dark:text-brand-dark' : 'text-sm text-ink-secondary dark:text-ink-secondary-dark'}>
               Mais recentes
-            </Text>
+            </AppText>
           </Pressable>
-          <Text className="text-gray-400 dark:text-gray-500">·</Text>
+          <AppText className="text-ink-secondary dark:text-ink-dark0">·</AppText>
           <Pressable
             accessibilityRole="radio"
             accessibilityLabel="Ordenar de A a Z"
@@ -143,9 +146,9 @@ export default function RecipeListScreen() {
             onPress={() => setSort('name')}
             className="min-h-[44px] justify-center"
           >
-            <Text className={sort === 'name' ? 'text-sm font-semibold text-blue-600' : 'text-sm text-gray-500 dark:text-gray-400'}>
+            <AppText className={sort === 'name' ? 'text-sm font-archivo-semibold text-brand dark:text-brand-dark' : 'text-sm text-ink-secondary dark:text-ink-secondary-dark'}>
               A-Z
-            </Text>
+            </AppText>
           </Pressable>
         </View>
       </View>
@@ -155,17 +158,19 @@ export default function RecipeListScreen() {
         keyExtractor={(item) => item.id}
         contentContainerClassName="px-4 pb-24"
         refreshControl={<RefreshControl refreshing={loading} onRefresh={load} />}
-        renderItem={({ item }) => (
-          <Link href={`/recipes/${type}/${item.id}`} asChild>
-            <RecipeCard recipe={item} onPress={() => {}} />
-          </Link>
+        renderItem={({ item, index }) => (
+          <Animated.View entering={FadeInDown.delay(listEntranceDelay(index)).duration(220)}>
+            <Link href={`/recipes/${type}/${item.id}`} asChild>
+              <RecipeCard recipe={item} onPress={() => {}} />
+            </Link>
+          </Animated.View>
         )}
         ListEmptyComponent={
           !loading ? (
             <View className="mt-12 items-center px-6">
-              <Text className="mb-4 text-center text-base text-gray-500 dark:text-gray-400">
+              <AppText className="mb-4 text-center text-base text-ink-secondary dark:text-ink-secondary-dark">
                 Você ainda não possui nenhuma ficha técnica
-              </Text>
+              </AppText>
               {canWriteRecipes(role) ? (
                 <Link href={`/recipes/${type}/new`} asChild>
                   <PrimaryButton label="Criar primeira ficha" />
@@ -181,9 +186,9 @@ export default function RecipeListScreen() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Criar nova ficha"
-            className="absolute bottom-6 right-6 h-14 w-14 items-center justify-center rounded-full bg-blue-600 shadow-lg active:bg-blue-700"
+            className="absolute bottom-6 right-6 h-14 w-14 items-center justify-center rounded-full bg-brand dark:bg-brand-dark shadow-lg active:bg-brand-pressed dark:active:bg-brand-dark"
           >
-            <Text className="text-2xl text-white">+</Text>
+            <AppText className="text-2xl text-white">+</AppText>
           </Pressable>
         </Link>
       ) : null}

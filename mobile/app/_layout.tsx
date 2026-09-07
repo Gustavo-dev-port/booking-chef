@@ -4,6 +4,14 @@ import * as Linking from 'expo-linking';
 import { SplashScreen, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import {
+  useFonts,
+  Archivo_400Regular,
+  Archivo_500Medium,
+  Archivo_600SemiBold,
+  Archivo_700Bold,
+} from '@expo-google-fonts/archivo';
+import { InstrumentSerif_400Regular } from '@expo-google-fonts/instrument-serif';
 import { startAuthListener, useAuthStore } from '../src/features/auth/store';
 import { handleAuthDeepLink } from '../src/features/auth/recovery';
 import { loadThemePreference, useThemeStore } from '../src/features/theme/store';
@@ -11,13 +19,25 @@ import { loadThemePreference, useThemeStore } from '../src/features/theme/store'
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  // Design System v1 — Archivo (texto) + Instrument Serif (títulos e
+  // números-herói, ex.: CMV%). Splash fica retida até carregar (ver
+  // RootNavigator abaixo) pra nenhuma tela piscar com a fonte do sistema
+  // antes de trocar pra Archivo/Instrument Serif.
+  const [fontsLoaded] = useFonts({
+    Archivo_400Regular,
+    Archivo_500Medium,
+    Archivo_600SemiBold,
+    Archivo_700Bold,
+    InstrumentSerif_400Regular,
+  });
+
   return (
     <SafeAreaProvider>
       {/* "auto" = ícones da barra de status seguem o tema (claro/escuro)
           automaticamente, inclusive quando o usuário troca manualmente
           pela tela de Perfil. */}
       <StatusBar style="auto" />
-      <RootNavigator />
+      <RootNavigator fontsLoaded={fontsLoaded} />
     </SafeAreaProvider>
   );
 }
@@ -41,7 +61,7 @@ export default function RootLayout() {
  * 4. com sessão mas sem profile+empresa ainda → grupo (onboarding).
  * 5. com sessão e onboarding completo → grupo (app).
  */
-function RootNavigator() {
+function RootNavigator({ fontsLoaded }: { fontsLoaded: boolean }) {
   const session = useAuthStore((s) => s.session);
   const profile = useAuthStore((s) => s.profile);
   const membership = useAuthStore((s) => s.membership);
@@ -57,8 +77,8 @@ function RootNavigator() {
   }, []);
 
   useEffect(() => {
-    if (!isLoading && themeLoaded) SplashScreen.hideAsync();
-  }, [isLoading, themeLoaded]);
+    if (!isLoading && themeLoaded && fontsLoaded) SplashScreen.hideAsync();
+  }, [isLoading, themeLoaded, fontsLoaded]);
 
   useEffect(() => {
     // Só navega depois que o Stack já existe (isLoading false) — chamar
@@ -67,7 +87,7 @@ function RootNavigator() {
     handleAuthDeepLink(url);
   }, [url, isLoading]);
 
-  if (isLoading || !themeLoaded) return null;
+  if (isLoading || !themeLoaded || !fontsLoaded) return null;
 
   const onboardingComplete = !!profile && !!membership;
   const inSpecialAuthFlow = isRecovering || isAcceptingInvite;

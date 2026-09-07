@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Alert, Text, View } from 'react-native';
+import { Alert, View } from 'react-native';
 import { Link, router, useLocalSearchParams } from 'expo-router';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { AppText } from '../../../../src/components/AppText';
 import { BackButton } from '../../../../src/components/BackButton';
 import { FormField } from '../../../../src/components/FormField';
 import { KeyboardAvoidingScreen } from '../../../../src/components/KeyboardAvoidingScreen';
@@ -189,18 +190,18 @@ export default function InventoryItemEditorScreen() {
 
   if (loading) {
     return (
-      <View className="flex-1 items-center justify-center bg-white dark:bg-gray-900">
-        <Text className="text-base text-gray-500 dark:text-gray-400">Carregando…</Text>
+      <View className="flex-1 items-center justify-center bg-surface-card dark:bg-surface-card-dark">
+        <AppText className="text-base text-ink-secondary dark:text-ink-secondary-dark">Carregando…</AppText>
       </View>
     );
   }
 
   return (
-    <KeyboardAvoidingScreen className="flex-1 bg-white dark:bg-gray-900" contentContainerClassName="px-6 py-16">
+    <KeyboardAvoidingScreen className="flex-1 bg-surface-card dark:bg-surface-card-dark" contentContainerClassName="px-6 py-16">
       <BackButton />
-      <Text className="mb-6 text-2xl font-bold text-gray-900 dark:text-gray-50">
+      <AppText className="mb-6 text-2xl font-archivo-bold text-ink dark:text-ink-dark">
         {isNew ? 'Novo insumo' : 'Editar insumo'}
-      </Text>
+      </AppText>
 
       <FormField control={control} name="name" label="Nome" />
 
@@ -244,9 +245,9 @@ export default function InventoryItemEditorScreen() {
       </View>
 
       {unitCostPreview !== null ? (
-        <Text className="mb-4 -mt-2 text-sm text-gray-500 dark:text-gray-400">
+        <AppText className="mb-4 -mt-2 text-sm text-ink-secondary dark:text-ink-secondary-dark">
           Custo por {usageUnitLabel}: R$ {unitCostPreview.toFixed(4)}
-        </Text>
+        </AppText>
       ) : null}
 
       <FormField
@@ -268,7 +269,7 @@ export default function InventoryItemEditorScreen() {
       <FormField control={control} name="internalCode" label="Código interno (opcional)" />
       <FormField control={control} name="barcode" label="Código de barras (opcional)" />
 
-      {formError ? <Text className="mb-4 text-sm text-red-600">{formError}</Text> : null}
+      {formError ? <AppText className="mb-4 text-sm text-danger dark:text-danger-dark">{formError}</AppText> : null}
 
       <View className="mb-3">
         <PrimaryButton label="Salvar insumo" onPress={handleSubmit(onSubmit)} loading={isSubmitting} />

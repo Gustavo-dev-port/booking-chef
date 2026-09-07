@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, View } from 'react-native';
 import { Link, router } from 'expo-router';
-import { BackButton } from '../../src/components/BackButton';
-import { PrimaryButton } from '../../src/components/PrimaryButton';
-import { deleteAccount, signOut } from '../../src/features/auth/api';
-import { useAuthStore } from '../../src/features/auth/store';
-import { useThemeStore, type ThemePreference } from '../../src/features/theme/store';
-import { supabase } from '../../src/lib/supabase';
+import { AppText } from '../../../src/components/AppText';
+import { PrimaryButton } from '../../../src/components/PrimaryButton';
+import { deleteAccount, signOut } from '../../../src/features/auth/api';
+import { useAuthStore } from '../../../src/features/auth/store';
+import { useThemeStore, type ThemePreference } from '../../../src/features/theme/store';
+import { supabase } from '../../../src/lib/supabase';
 
 const THEME_OPTIONS: Array<{ value: ThemePreference; label: string }> = [
   { value: 'light', label: 'Claro' },
@@ -65,20 +65,19 @@ export default function ProfileScreen() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-white dark:bg-gray-900" contentContainerClassName="px-6 py-16">
-      <BackButton />
-      <Text className="mb-6 text-2xl font-bold text-gray-900 dark:text-gray-50">Perfil</Text>
+    <ScrollView className="flex-1 bg-surface-card dark:bg-surface-card-dark" contentContainerClassName="px-6 py-16">
+      <AppText className="mb-6 text-2xl font-archivo-bold text-ink dark:text-ink-dark">Perfil</AppText>
 
-      <View className="mb-8 rounded-2xl border border-gray-200 dark:border-gray-700 p-4">
-        <Text className="text-sm text-gray-500 dark:text-gray-400">Nome</Text>
-        <Text className="mb-3 text-base text-gray-900 dark:text-gray-50">{profile?.name || '—'}</Text>
-        <Text className="text-sm text-gray-500 dark:text-gray-400">Email</Text>
-        <Text className="mb-3 text-base text-gray-900 dark:text-gray-50">{profile?.email || '—'}</Text>
-        <Text className="text-sm text-gray-500 dark:text-gray-400">Estabelecimento</Text>
-        <Text className="text-base text-gray-900 dark:text-gray-50">{companyName || '—'}</Text>
+      <View className="mb-8 rounded-2xl border border-surface-border dark:border-surface-border-dark p-4">
+        <AppText className="text-sm text-ink-secondary dark:text-ink-secondary-dark">Nome</AppText>
+        <AppText className="mb-3 text-base text-ink dark:text-ink-dark">{profile?.name || '—'}</AppText>
+        <AppText className="text-sm text-ink-secondary dark:text-ink-secondary-dark">Email</AppText>
+        <AppText className="mb-3 text-base text-ink dark:text-ink-dark">{profile?.email || '—'}</AppText>
+        <AppText className="text-sm text-ink-secondary dark:text-ink-secondary-dark">Estabelecimento</AppText>
+        <AppText className="text-base text-ink dark:text-ink-dark">{companyName || '—'}</AppText>
       </View>
 
-      <Text className="mb-3 text-base font-semibold text-gray-900 dark:text-gray-50">Aparência</Text>
+      <AppText className="mb-3 text-base font-archivo-semibold text-ink dark:text-ink-dark">Aparência</AppText>
       <View className="mb-8 flex-row gap-2">
         {THEME_OPTIONS.map((option) => {
           const selected = themePreference === option.value;
@@ -91,32 +90,32 @@ export default function ProfileScreen() {
               onPress={() => setThemePreference(option.value)}
               className={
                 'min-h-[44px] flex-1 items-center justify-center rounded-full border px-3 py-2 ' +
-                (selected ? 'border-blue-600 bg-blue-600' : 'border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900')
+                (selected ? 'border-brand dark:border-brand-dark bg-brand dark:bg-brand-dark' : 'border-surface-input-border dark:border-surface-border-dark bg-surface-card dark:bg-surface-card-dark')
               }
             >
-              <Text
+              <AppText
                 className={
-                  selected ? 'text-sm font-semibold text-white' : 'text-sm text-gray-700 dark:text-gray-300'
+                  selected ? 'text-sm font-archivo-semibold text-white' : 'text-sm text-ink dark:text-ink-dark'
                 }
               >
                 {option.label}
-              </Text>
+              </AppText>
             </Pressable>
           );
         })}
       </View>
 
-      <Text className="mb-3 text-base font-semibold text-gray-900 dark:text-gray-50">Privacidade</Text>
+      <AppText className="mb-3 text-base font-archivo-semibold text-ink dark:text-ink-dark">Privacidade</AppText>
       <View className="mb-8 gap-1">
         <Link href="/terms" asChild>
-          <Text accessibilityRole="link" className="min-h-[44px] py-2 text-base text-blue-600">
+          <AppText accessibilityRole="link" className="min-h-[44px] py-2 text-base text-brand dark:text-brand-dark">
             Termos de Uso
-          </Text>
+          </AppText>
         </Link>
         <Link href="/privacy" asChild>
-          <Text accessibilityRole="link" className="min-h-[44px] py-2 text-base text-blue-600">
+          <AppText accessibilityRole="link" className="min-h-[44px] py-2 text-base text-brand dark:text-brand-dark">
             Política de Privacidade
-          </Text>
+          </AppText>
         </Link>
       </View>
 

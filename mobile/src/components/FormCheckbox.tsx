@@ -1,5 +1,6 @@
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { Controller, type Control, type FieldValues, type Path } from 'react-hook-form';
+import { AppText } from './AppText';
 
 type FormCheckboxProps<T extends FieldValues> = {
   control: Control<T>;
@@ -25,14 +26,14 @@ export function FormCheckbox<T extends FieldValues>({ control, name, label }: Fo
             <View
               className={
                 'h-6 w-6 items-center justify-center rounded-md border-2 ' +
-                (value ? 'border-blue-600 bg-blue-600' : 'border-gray-400 dark:border-gray-500 bg-white dark:bg-gray-900')
+                (value ? 'border-brand dark:border-brand-dark bg-brand dark:bg-brand-dark' : 'border-surface-input-border dark:border-surface-border-dark bg-surface-card dark:bg-surface-card-dark')
               }
             >
-              {value ? <Text className="text-xs font-bold text-white">✓</Text> : null}
+              {value ? <AppText className="text-xs font-archivo-bold text-white">✓</AppText> : null}
             </View>
-            <Text className="flex-1 text-base text-gray-700 dark:text-gray-300">{label}</Text>
+            <AppText className="flex-1 text-base text-ink dark:text-ink-dark">{label}</AppText>
           </Pressable>
-          {error?.message ? <Text className="mt-1 text-sm text-red-600">{error.message}</Text> : null}
+          {error?.message ? <AppText className="mt-1 text-sm text-danger dark:text-danger-dark">{error.message}</AppText> : null}
         </View>
       )}
     />
