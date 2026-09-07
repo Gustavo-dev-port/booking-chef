@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, View } from 'react-native';
 import { Link, router } from 'expo-router';
+import { AppText } from '../../../src/components/AppText';
 import { PrimaryButton } from '../../../src/components/PrimaryButton';
 import { deleteAccount, signOut } from '../../../src/features/auth/api';
 import { useAuthStore } from '../../../src/features/auth/store';
@@ -65,18 +66,18 @@ export default function ProfileScreen() {
 
   return (
     <ScrollView className="flex-1 bg-surface-card dark:bg-surface-card-dark" contentContainerClassName="px-6 py-16">
-      <Text className="mb-6 text-2xl font-archivo-bold text-ink dark:text-ink-dark">Perfil</Text>
+      <AppText className="mb-6 text-2xl font-archivo-bold text-ink dark:text-ink-dark">Perfil</AppText>
 
       <View className="mb-8 rounded-2xl border border-surface-border dark:border-surface-border-dark p-4">
-        <Text className="text-sm text-ink-secondary dark:text-ink-secondary-dark">Nome</Text>
-        <Text className="mb-3 text-base text-ink dark:text-ink-dark">{profile?.name || '—'}</Text>
-        <Text className="text-sm text-ink-secondary dark:text-ink-secondary-dark">Email</Text>
-        <Text className="mb-3 text-base text-ink dark:text-ink-dark">{profile?.email || '—'}</Text>
-        <Text className="text-sm text-ink-secondary dark:text-ink-secondary-dark">Estabelecimento</Text>
-        <Text className="text-base text-ink dark:text-ink-dark">{companyName || '—'}</Text>
+        <AppText className="text-sm text-ink-secondary dark:text-ink-secondary-dark">Nome</AppText>
+        <AppText className="mb-3 text-base text-ink dark:text-ink-dark">{profile?.name || '—'}</AppText>
+        <AppText className="text-sm text-ink-secondary dark:text-ink-secondary-dark">Email</AppText>
+        <AppText className="mb-3 text-base text-ink dark:text-ink-dark">{profile?.email || '—'}</AppText>
+        <AppText className="text-sm text-ink-secondary dark:text-ink-secondary-dark">Estabelecimento</AppText>
+        <AppText className="text-base text-ink dark:text-ink-dark">{companyName || '—'}</AppText>
       </View>
 
-      <Text className="mb-3 text-base font-archivo-semibold text-ink dark:text-ink-dark">Aparência</Text>
+      <AppText className="mb-3 text-base font-archivo-semibold text-ink dark:text-ink-dark">Aparência</AppText>
       <View className="mb-8 flex-row gap-2">
         {THEME_OPTIONS.map((option) => {
           const selected = themePreference === option.value;
@@ -92,29 +93,29 @@ export default function ProfileScreen() {
                 (selected ? 'border-brand dark:border-brand-dark bg-brand dark:bg-brand-dark' : 'border-surface-input-border dark:border-surface-border-dark bg-surface-card dark:bg-surface-card-dark')
               }
             >
-              <Text
+              <AppText
                 className={
                   selected ? 'text-sm font-archivo-semibold text-white' : 'text-sm text-ink dark:text-ink-dark'
                 }
               >
                 {option.label}
-              </Text>
+              </AppText>
             </Pressable>
           );
         })}
       </View>
 
-      <Text className="mb-3 text-base font-archivo-semibold text-ink dark:text-ink-dark">Privacidade</Text>
+      <AppText className="mb-3 text-base font-archivo-semibold text-ink dark:text-ink-dark">Privacidade</AppText>
       <View className="mb-8 gap-1">
         <Link href="/terms" asChild>
-          <Text accessibilityRole="link" className="min-h-[44px] py-2 text-base text-brand dark:text-brand-dark">
+          <AppText accessibilityRole="link" className="min-h-[44px] py-2 text-base text-brand dark:text-brand-dark">
             Termos de Uso
-          </Text>
+          </AppText>
         </Link>
         <Link href="/privacy" asChild>
-          <Text accessibilityRole="link" className="min-h-[44px] py-2 text-base text-brand dark:text-brand-dark">
+          <AppText accessibilityRole="link" className="min-h-[44px] py-2 text-base text-brand dark:text-brand-dark">
             Política de Privacidade
-          </Text>
+          </AppText>
         </Link>
       </View>
 

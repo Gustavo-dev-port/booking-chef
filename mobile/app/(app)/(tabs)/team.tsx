@@ -1,8 +1,10 @@
 import { useCallback, useState } from 'react';
-import { Alert, FlatList, Pressable, RefreshControl, Text, View } from 'react-native';
+import { Alert, FlatList, Pressable, RefreshControl, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useFocusEffect } from 'expo-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { AppText } from '../../../src/components/AppText';
 import { FormField } from '../../../src/components/FormField';
 import { KeyboardAvoidingScreen } from '../../../src/components/KeyboardAvoidingScreen';
 import { PrimaryButton } from '../../../src/components/PrimaryButton';
@@ -12,6 +14,7 @@ import { EMPLOYEE_ROLES, employeeRoleLabel, employeeStatusLabel } from '../../..
 import { useAuthStore } from '../../../src/features/auth/store';
 import { canManageBusiness, resolveAppRole } from '../../../src/features/team/permissions';
 import { useRoleGuard } from '../../../src/hooks/useRoleGuard';
+import { listEntranceDelay } from '../../../src/features/ui/listEntrance';
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' });
@@ -104,13 +107,13 @@ export default function TeamScreen() {
 
   return (
     <KeyboardAvoidingScreen className="flex-1 bg-surface-page dark:bg-surface-page-dark" contentContainerClassName="px-4 pb-24 pt-16">
-      <Text className="mb-6 text-2xl font-archivo-bold text-ink dark:text-ink-dark">Equipe</Text>
+      <AppText className="mb-6 text-2xl font-archivo-bold text-ink dark:text-ink-dark">Equipe</AppText>
 
       {isOwner ? (
         <View className="mb-8 rounded-2xl border border-surface-border dark:border-surface-border-dark bg-surface-card dark:bg-surface-card-dark p-4">
-          <Text className="mb-3 text-base font-archivo-semibold text-ink dark:text-ink-dark">
+          <AppText className="mb-3 text-base font-archivo-semibold text-ink dark:text-ink-dark">
             Convidar funcionário
-          </Text>
+          </AppText>
 
           <FormField control={control} name="name" label="Nome" />
           <FormField
@@ -122,7 +125,7 @@ export default function TeamScreen() {
             keyboardType="email-address"
           />
 
-          <Text className="mb-1 text-base text-ink dark:text-ink-dark">Cargo</Text>
+          <AppText className="mb-1 text-base text-ink dark:text-ink-dark">Cargo</AppText>
           <View className="mb-4 flex-row flex-wrap gap-2">
             {EMPLOYEE_ROLES.map((option) => {
               const selected = selectedRole === option.value;
@@ -138,50 +141,53 @@ export default function TeamScreen() {
                     (selected ? 'border-brand dark:border-brand-dark bg-brand dark:bg-brand-dark' : 'border-surface-input-border dark:border-surface-border-dark bg-surface-card dark:bg-surface-card-dark')
                   }
                 >
-                  <Text className={selected ? 'text-sm font-archivo-semibold text-white' : 'text-sm text-ink dark:text-ink-dark'}>
+                  <AppText className={selected ? 'text-sm font-archivo-semibold text-white' : 'text-sm text-ink dark:text-ink-dark'}>
                     {option.label}
-                  </Text>
+                  </AppText>
                 </Pressable>
               );
             })}
           </View>
 
-          {formError ? <Text className="mb-3 text-sm text-danger dark:text-danger-dark">{formError}</Text> : null}
-          {success ? <Text className="mb-3 text-sm text-success dark:text-success-dark">{success}</Text> : null}
+          {formError ? <AppText className="mb-3 text-sm text-danger dark:text-danger-dark">{formError}</AppText> : null}
+          {success ? <AppText className="mb-3 text-sm text-success dark:text-success-dark">{success}</AppText> : null}
 
           <PrimaryButton label="Enviar convite" onPress={handleSubmit(onSubmit)} loading={isSubmitting} />
         </View>
       ) : null}
 
-      <Text className="mb-3 text-base font-archivo-semibold text-ink dark:text-ink-dark">
+      <AppText className="mb-3 text-base font-archivo-semibold text-ink dark:text-ink-dark">
         {isOwner ? 'Convites e equipe' : 'Equipe'}
-      </Text>
+      </AppText>
 
       <FlatList
         data={employees}
         keyExtractor={(item) => item.id}
         scrollEnabled={false}
         refreshControl={<RefreshControl refreshing={loading} onRefresh={load} />}
-        renderItem={({ item }) => (
-          <View className="mb-2 rounded-xl border border-surface-border dark:border-surface-border-dark bg-surface-card dark:bg-surface-card-dark p-3">
+        renderItem={({ item, index }) => (
+          <Animated.View
+            entering={FadeInDown.delay(listEntranceDelay(index)).duration(220)}
+            className="mb-2 rounded-xl border border-surface-border dark:border-surface-border-dark bg-surface-card dark:bg-surface-card-dark p-3"
+          >
             <View className="flex-row items-center justify-between">
-              <Text className="flex-1 pr-2 text-base font-archivo-semibold text-ink dark:text-ink-dark" numberOfLines={1}>
+              <AppText className="flex-1 pr-2 text-base font-archivo-semibold text-ink dark:text-ink-dark" numberOfLines={1}>
                 {item.name}
-              </Text>
-              <Text
+              </AppText>
+              <AppText
                 className={
                   'text-xs font-archivo-semibold ' + (item.status === 'ativo' ? 'text-success dark:text-success-dark' : 'text-ink-secondary dark:text-ink-secondary-dark')
                 }
               >
                 {employeeStatusLabel(item.status)}
-              </Text>
+              </AppText>
             </View>
-            <Text className="mt-0.5 text-sm text-ink-secondary dark:text-ink-secondary-dark" numberOfLines={1}>
+            <AppText className="mt-0.5 text-sm text-ink-secondary dark:text-ink-secondary-dark" numberOfLines={1}>
               {item.email} · {employeeRoleLabel(item.role)}
-            </Text>
-            <Text className="mt-1 text-xs text-ink-secondary dark:text-ink-secondary-dark">
+            </AppText>
+            <AppText className="mt-1 text-xs text-ink-secondary dark:text-ink-secondary-dark">
               Convidado em {formatDate(item.invited_at)}
-            </Text>
+            </AppText>
             {isOwner && item.status !== 'removido' ? (
               <Pressable
                 accessibilityRole="button"
@@ -189,16 +195,16 @@ export default function TeamScreen() {
                 onPress={() => handleRemoveAccess(item)}
                 className="mt-2 min-h-[32px] self-start justify-center"
               >
-                <Text className="text-sm font-archivo-medium text-danger dark:text-danger-dark">Remover acesso</Text>
+                <AppText className="text-sm font-archivo-medium text-danger dark:text-danger-dark">Remover acesso</AppText>
               </Pressable>
             ) : null}
-          </View>
+          </Animated.View>
         )}
         ListEmptyComponent={
           !loading ? (
-            <Text className="text-center text-base text-ink-secondary dark:text-ink-secondary-dark">
+            <AppText className="text-center text-base text-ink-secondary dark:text-ink-secondary-dark">
               {isOwner ? 'Nenhum convite enviado ainda.' : 'Nenhum funcionário cadastrado ainda.'}
-            </Text>
+            </AppText>
           ) : null
         }
       />

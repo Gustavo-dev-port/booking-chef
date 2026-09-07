@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
+import { AppText } from '../../src/components/AppText';
 import { BackButton } from '../../src/components/BackButton';
 import { PrimaryButton } from '../../src/components/PrimaryButton';
 import { useAuthStore } from '../../src/features/auth/store';
@@ -117,10 +118,10 @@ export default function BookingScreen() {
   return (
     <ScrollView className="flex-1 bg-surface-card dark:bg-surface-card-dark" contentContainerClassName="flex-grow justify-center px-6 py-12">
       <BackButton />
-      <Text className="mb-1 text-2xl font-archivo-bold text-ink dark:text-ink-dark">Gerar Booking</Text>
-      <Text className="mb-8 text-base text-ink-secondary dark:text-ink-secondary-dark">
+      <AppText className="mb-1 text-2xl font-archivo-bold text-ink dark:text-ink-dark">Gerar Booking</AppText>
+      <AppText className="mb-8 text-base text-ink-secondary dark:text-ink-secondary-dark">
         Um PDF com capa, sumário e uma ficha por página — pronto pra imprimir.
-      </Text>
+      </AppText>
 
       <View className="mb-8 gap-3">
         {SELECTION_OPTIONS.map((option) => {
@@ -144,13 +145,13 @@ export default function BookingScreen() {
               >
                 {selected ? <View className="h-2.5 w-2.5 rounded-full bg-brand dark:bg-brand-dark" /> : null}
               </View>
-              <Text className="text-base text-ink dark:text-ink-dark">{option.label}</Text>
+              <AppText className="text-base text-ink dark:text-ink-dark">{option.label}</AppText>
             </Pressable>
           );
         })}
       </View>
 
-      {error ? <Text className="mb-4 text-sm text-danger dark:text-danger-dark">{error}</Text> : null}
+      {error ? <AppText className="mb-4 text-sm text-danger dark:text-danger-dark">{error}</AppText> : null}
 
       <PrimaryButton label="Gerar PDF" onPress={handleGenerate} loading={generating} />
     </ScrollView>

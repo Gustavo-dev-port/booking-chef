@@ -1,6 +1,8 @@
 import { useCallback, useState } from 'react';
-import { FlatList, Pressable, RefreshControl, Text, TextInput, View } from 'react-native';
+import { FlatList, Pressable, RefreshControl, TextInput, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { AppText } from '../../../../src/components/AppText';
 import { BackButton } from '../../../../src/components/BackButton';
 import { PrimaryButton } from '../../../../src/components/PrimaryButton';
 import { getInventoryItem, type InventoryItem } from '../../../../src/features/inventory/api';
@@ -10,6 +12,7 @@ import { useAuthStore } from '../../../../src/features/auth/store';
 import { canManageBusiness, resolveAppRole } from '../../../../src/features/team/permissions';
 import { useRoleGuard } from '../../../../src/hooks/useRoleGuard';
 import { ingredientUnitLabel } from '../../../../src/validators/recipe';
+import { listEntranceDelay } from '../../../../src/features/ui/listEntrance';
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
@@ -101,11 +104,11 @@ export default function InventoryMovementsScreen() {
     <View className="flex-1 bg-surface-page dark:bg-surface-page-dark pt-16">
       <View className="px-4">
         <BackButton />
-        <Text className="mb-1 text-2xl font-archivo-bold text-ink dark:text-ink-dark">{item?.name ?? 'Insumo'}</Text>
+        <AppText className="mb-1 text-2xl font-archivo-bold text-ink dark:text-ink-dark">{item?.name ?? 'Insumo'}</AppText>
         {item ? (
-          <Text className="mb-4 text-base text-ink-secondary dark:text-ink-secondary-dark">
+          <AppText className="mb-4 text-base text-ink-secondary dark:text-ink-secondary-dark">
             Saldo atual: {item.current_quantity} {unitLabel}
-          </Text>
+          </AppText>
         ) : null}
 
         <View className="mb-4 flex-row flex-wrap gap-2">
@@ -123,9 +126,9 @@ export default function InventoryMovementsScreen() {
                   (selected ? 'border-brand dark:border-brand-dark bg-brand dark:bg-brand-dark' : 'border-surface-input-border dark:border-surface-border-dark bg-surface-card dark:bg-surface-card-dark')
                 }
               >
-                <Text className={selected ? 'text-sm font-archivo-semibold text-white' : 'text-sm text-ink dark:text-ink-dark'}>
+                <AppText className={selected ? 'text-sm font-archivo-semibold text-white' : 'text-sm text-ink dark:text-ink-dark'}>
                   {option.label}
-                </Text>
+                </AppText>
               </Pressable>
             );
           })}
@@ -143,9 +146,9 @@ export default function InventoryMovementsScreen() {
                 (inputMode === 'purchase' ? 'border-brand dark:border-brand-dark bg-brand dark:bg-brand-dark' : 'border-surface-input-border dark:border-surface-border-dark bg-surface-card dark:bg-surface-card-dark')
               }
             >
-              <Text className={inputMode === 'purchase' ? 'text-sm font-archivo-semibold text-white' : 'text-sm text-ink dark:text-ink-dark'}>
+              <AppText className={inputMode === 'purchase' ? 'text-sm font-archivo-semibold text-white' : 'text-sm text-ink dark:text-ink-dark'}>
                 Em {purchaseUnitLabel} (compra)
-              </Text>
+              </AppText>
             </Pressable>
             <Pressable
               accessibilityRole="radio"
@@ -157,16 +160,16 @@ export default function InventoryMovementsScreen() {
                 (inputMode === 'usage' ? 'border-brand dark:border-brand-dark bg-brand dark:bg-brand-dark' : 'border-surface-input-border dark:border-surface-border-dark bg-surface-card dark:bg-surface-card-dark')
               }
             >
-              <Text className={inputMode === 'usage' ? 'text-sm font-archivo-semibold text-white' : 'text-sm text-ink dark:text-ink-dark'}>
+              <AppText className={inputMode === 'usage' ? 'text-sm font-archivo-semibold text-white' : 'text-sm text-ink dark:text-ink-dark'}>
                 Em {unitLabel} (uso)
-              </Text>
+              </AppText>
             </Pressable>
           </View>
         ) : null}
 
-        <Text className="mb-1 text-base text-ink dark:text-ink-dark">
+        <AppText className="mb-1 text-base text-ink dark:text-ink-dark">
           {type === 'ajuste' ? `Novo saldo contado (${activeUnitLabel})` : `Quantidade (${activeUnitLabel})`}
-        </Text>
+        </AppText>
         <TextInput
           accessibilityLabel="Quantidade"
           keyboardType="decimal-pad"
@@ -175,7 +178,7 @@ export default function InventoryMovementsScreen() {
           className="mb-3 min-h-[44px] rounded-xl border border-surface-input-border dark:border-surface-border-dark bg-surface-card dark:bg-surface-card-dark px-4 text-base text-ink dark:text-ink-dark"
         />
 
-        <Text className="mb-1 text-base text-ink dark:text-ink-dark">Motivo (opcional)</Text>
+        <AppText className="mb-1 text-base text-ink dark:text-ink-dark">Motivo (opcional)</AppText>
         <TextInput
           accessibilityLabel="Motivo"
           value={reason}
@@ -183,13 +186,13 @@ export default function InventoryMovementsScreen() {
           className="mb-3 min-h-[44px] rounded-xl border border-surface-input-border dark:border-surface-border-dark bg-surface-card dark:bg-surface-card-dark px-4 text-base text-ink dark:text-ink-dark"
         />
 
-        {formError ? <Text className="mb-3 text-sm text-danger dark:text-danger-dark">{formError}</Text> : null}
+        {formError ? <AppText className="mb-3 text-sm text-danger dark:text-danger-dark">{formError}</AppText> : null}
 
         <View className="mb-6">
           <PrimaryButton label="Lançar movimentação" onPress={handleSubmit} loading={submitting} />
         </View>
 
-        <Text className="mb-3 text-base font-archivo-semibold text-ink dark:text-ink-dark">Histórico</Text>
+        <AppText className="mb-3 text-base font-archivo-semibold text-ink dark:text-ink-dark">Histórico</AppText>
       </View>
 
       <FlatList
@@ -197,30 +200,33 @@ export default function InventoryMovementsScreen() {
         keyExtractor={(movement) => movement.id}
         contentContainerClassName="px-4 pb-12"
         refreshControl={<RefreshControl refreshing={loading} onRefresh={load} />}
-        renderItem={({ item: movement }) => (
-          <View className="mb-2 rounded-xl border border-surface-border dark:border-surface-border-dark bg-surface-card dark:bg-surface-card-dark p-3">
+        renderItem={({ item: movement, index }) => (
+          <Animated.View
+            entering={FadeInDown.delay(listEntranceDelay(index)).duration(220)}
+            className="mb-2 rounded-xl border border-surface-border dark:border-surface-border-dark bg-surface-card dark:bg-surface-card-dark p-3"
+          >
             <View className="flex-row items-center justify-between">
-              <Text className="text-base font-archivo-semibold text-ink dark:text-ink-dark">
+              <AppText className="text-base font-archivo-semibold text-ink dark:text-ink-dark">
                 {movementTypeLabel(movement.type)}
-              </Text>
-              <Text className="text-base text-ink dark:text-ink-dark">
+              </AppText>
+              <AppText className="text-base text-ink dark:text-ink-dark">
                 {movement.quantity} {unitLabel}
-              </Text>
+              </AppText>
             </View>
             {movement.reason ? (
-              <Text className="mt-0.5 text-sm text-ink-secondary dark:text-ink-secondary-dark">{movement.reason}</Text>
+              <AppText className="mt-0.5 text-sm text-ink-secondary dark:text-ink-secondary-dark">{movement.reason}</AppText>
             ) : null}
-            <Text className="mt-1 text-xs text-ink-secondary dark:text-ink-secondary-dark">
+            <AppText className="mt-1 text-xs text-ink-secondary dark:text-ink-secondary-dark">
               {movement.created_by === session?.user.id ? profile?.name || 'Você' : 'Outro usuário'} ·{' '}
               {formatDate(movement.created_at)}
-            </Text>
-          </View>
+            </AppText>
+          </Animated.View>
         )}
         ListEmptyComponent={
           !loading ? (
-            <Text className="mt-4 text-center text-base text-ink-secondary dark:text-ink-secondary-dark">
+            <AppText className="mt-4 text-center text-base text-ink-secondary dark:text-ink-secondary-dark">
               Nenhuma movimentação lançada ainda.
-            </Text>
+            </AppText>
           ) : null
         }
       />

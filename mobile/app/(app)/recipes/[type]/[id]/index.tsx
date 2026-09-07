@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, Image, Pressable, Text, TextInput, View } from 'react-native';
+import { Alert, Image, Pressable, TextInput, View } from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { Link, router, useLocalSearchParams } from 'expo-router';
 import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { AppText } from '../../../../../src/components/AppText';
 import { BackButton } from '../../../../../src/components/BackButton';
 import { FormField } from '../../../../../src/components/FormField';
 import { IngredientCatalogPicker } from '../../../../../src/components/IngredientCatalogPicker';
@@ -205,6 +207,18 @@ export default function RecipeEditorScreen() {
       ),
     [watchedIngredients, watchedSalePrice, costById]
   );
+  // Hospeda o resultado em vez de chamar computeCmvStatus() 3x no JSX
+  // abaixo (mesmo valor, |cmv.cmvPercentage| não muda entre as chamadas).
+  const cmvStatus = computeCmvStatus(cmv.cmvPercentage ?? 0);
+
+  // Microinteração (Design System v1, seção 07) — a barra de CMV anima a
+  // largura em vez de saltar direto pro valor novo a cada tecla digitada.
+  const cmvBarPercent = cmv.cmvPercentage !== null ? Math.min(100, (cmv.cmvPercentage / 60) * 100) : 0;
+  const cmvBarWidth = useSharedValue(cmvBarPercent);
+  useEffect(() => {
+    cmvBarWidth.value = withTiming(cmvBarPercent, { duration: 300 });
+  }, [cmvBarPercent, cmvBarWidth]);
+  const cmvBarStyle = useAnimatedStyle(() => ({ width: `${cmvBarWidth.value}%` }));
 
   // Calculadora de preço sugerido (07.4) — usa o custo total já calculado
   // acima; "Usar este preço" preenche salePrice mediante confirmação
@@ -264,7 +278,7 @@ export default function RecipeEditorScreen() {
   if (loading) {
     return (
       <View className="flex-1 items-center justify-center bg-surface-card dark:bg-surface-card-dark">
-        <Text className="text-base text-ink-secondary dark:text-ink-secondary-dark">Carregando…</Text>
+        <AppText className="text-base text-ink-secondary dark:text-ink-secondary-dark">Carregando…</AppText>
       </View>
     );
   }
@@ -272,13 +286,13 @@ export default function RecipeEditorScreen() {
   return (
     <KeyboardAvoidingScreen className="flex-1 bg-surface-card dark:bg-surface-card-dark" contentContainerClassName="px-6 py-16">
       <BackButton />
-      <Text className="mb-6 text-2xl font-archivo-bold text-ink dark:text-ink-dark">
+      <AppText className="mb-6 text-2xl font-archivo-bold text-ink dark:text-ink-dark">
         {isNew ? 'Nova ficha' : 'Editar ficha'}
-      </Text>
+      </AppText>
 
       <FormField control={control} name="name" label="Nome" />
 
-      <Text className="mb-3 mt-2 text-base font-archivo-semibold text-ink dark:text-ink-dark">Ingredientes</Text>
+      <AppText className="mb-3 mt-2 text-base font-archivo-semibold text-ink dark:text-ink-dark">Ingredientes</AppText>
       {fields.map((field, index) => {
         const rowIngredientId = watchedIngredients?.[index]?.ingredientId;
         const linkedItem = rowIngredientId ? catalogItems.find((c) => c.id === rowIngredientId) : undefined;
@@ -288,15 +302,15 @@ export default function RecipeEditorScreen() {
             {linkedItem ? (
               <View className="flex-row items-center justify-between">
                 <View className="flex-1 pr-2">
-                  <Text className="text-base font-archivo-medium text-ink dark:text-ink-dark" numberOfLines={1}>
+                  <AppText className="text-base font-archivo-medium text-ink dark:text-ink-dark" numberOfLines={1}>
                     {linkedItem.name}
-                  </Text>
-                  <Text className="text-xs text-ink-secondary dark:text-ink-secondary-dark">
+                  </AppText>
+                  <AppText className="text-xs text-ink-secondary dark:text-ink-secondary-dark">
                     R$ {(linkedItem.unit_cost ?? 0).toFixed(2)}/{ingredientUnitLabel(linkedItem.usage_unit)}
                     {linkedItem.category_id && categoryNameById.get(linkedItem.category_id)
                       ? ` · ${categoryNameById.get(linkedItem.category_id)}`
                       : ' · do estoque'}
-                  </Text>
+                  </AppText>
                 </View>
                 <Pressable
                   accessibilityRole="button"
@@ -304,7 +318,7 @@ export default function RecipeEditorScreen() {
                   onPress={() => setValue(`ingredients.${index}.ingredientId`, '')}
                   className="h-11 w-11 items-center justify-center"
                 >
-                  <Text className="text-lg text-ink-secondary dark:text-ink-secondary-dark">✕</Text>
+                  <AppText className="text-lg text-ink-secondary dark:text-ink-secondary-dark">✕</AppText>
                 </Pressable>
               </View>
             ) : (
@@ -340,11 +354,11 @@ export default function RecipeEditorScreen() {
               <View className="flex-1">
                 {linkedItem ? (
                   <View>
-                    <Text className="mb-1 text-base text-ink dark:text-ink-dark">Un.</Text>
+                    <AppText className="mb-1 text-base text-ink dark:text-ink-dark">Un.</AppText>
                     <View className="min-h-[44px] items-center justify-center rounded-xl border border-surface-border dark:border-surface-border-dark px-3">
-                      <Text className="text-base text-ink-secondary dark:text-ink-secondary-dark">
+                      <AppText className="text-base text-ink-secondary dark:text-ink-secondary-dark">
                         {ingredientUnitLabel(linkedItem.usage_unit)}
-                      </Text>
+                      </AppText>
                     </View>
                   </View>
                 ) : (
@@ -358,7 +372,7 @@ export default function RecipeEditorScreen() {
                 disabled={!canWrite}
                 className={'mt-9 h-11 w-11 items-center justify-center' + (canWrite ? '' : ' opacity-0')}
               >
-                <Text className="text-lg text-danger dark:text-danger-dark">✕</Text>
+                <AppText className="text-lg text-danger dark:text-danger-dark">✕</AppText>
               </Pressable>
             </View>
           </View>
@@ -390,10 +404,10 @@ export default function RecipeEditorScreen() {
 
       <View className="mb-4 rounded-xl border border-surface-border dark:border-surface-border-dark bg-surface-page dark:bg-surface-page-dark p-3">
         <View className="flex-row justify-between">
-          <Text className="text-sm text-ink-secondary dark:text-ink-secondary-dark">Custo total</Text>
-          <Text className="font-archivo-semibold text-base text-ink dark:text-ink-dark">
+          <AppText className="text-sm text-ink-secondary dark:text-ink-secondary-dark">Custo total</AppText>
+          <AppText className="font-archivo-semibold text-base text-ink dark:text-ink-dark">
             R$ {cmv.totalCost.toFixed(2)}
-          </Text>
+          </AppText>
         </View>
         {cmv.cmvPercentage !== null ? (
           <>
@@ -404,41 +418,38 @@ export default function RecipeEditorScreen() {
                 por empresa. */}
             <View className="mt-3">
               <View className="flex-row items-baseline justify-between">
-                <Text className={`font-display text-3xl ${CMV_STATUS_CLASSES[computeCmvStatus(cmv.cmvPercentage)].text}`}>
+                <AppText className={`font-display text-3xl ${CMV_STATUS_CLASSES[cmvStatus].text}`}>
                   {cmv.cmvPercentage.toFixed(1)}%
-                </Text>
-                <Text className={`font-archivo-bold text-xs ${CMV_STATUS_CLASSES[computeCmvStatus(cmv.cmvPercentage)].text}`}>
-                  {cmvStatusLabel(computeCmvStatus(cmv.cmvPercentage), cmv.cmvPercentage)}
-                </Text>
+                </AppText>
+                <AppText className={`font-archivo-bold text-xs ${CMV_STATUS_CLASSES[cmvStatus].text}`}>
+                  {cmvStatusLabel(cmvStatus, cmv.cmvPercentage)}
+                </AppText>
               </View>
               <View className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-alt dark:bg-surface-border-dark">
-                <View
-                  className={`h-1.5 rounded-full ${CMV_STATUS_CLASSES[computeCmvStatus(cmv.cmvPercentage)].bar}`}
-                  style={{ width: `${Math.min(100, (cmv.cmvPercentage / 60) * 100)}%` }}
-                />
+                <Animated.View className={`h-1.5 rounded-full ${CMV_STATUS_CLASSES[cmvStatus].bar}`} style={cmvBarStyle} />
               </View>
             </View>
             <View className="mt-3 flex-row justify-between">
-              <Text className="text-sm text-ink-secondary dark:text-ink-secondary-dark">Margem bruta</Text>
-              <Text className="font-archivo-semibold text-base text-ink dark:text-ink-dark">
+              <AppText className="text-sm text-ink-secondary dark:text-ink-secondary-dark">Margem bruta</AppText>
+              <AppText className="font-archivo-semibold text-base text-ink dark:text-ink-dark">
                 R$ {(cmv.grossMargin ?? 0).toFixed(2)}
-              </Text>
+              </AppText>
             </View>
           </>
         ) : (
-          <Text className="mt-1 text-xs text-ink-secondary dark:text-ink-secondary-dark">
+          <AppText className="mt-1 text-xs text-ink-secondary dark:text-ink-secondary-dark">
             Informe o preço de venda pra ver o CMV%.
-          </Text>
+          </AppText>
         )}
         {cmv.hasUnknownCost ? (
-          <Text className="mt-1 text-xs text-warning dark:text-warning-dark">
+          <AppText className="mt-1 text-xs text-warning dark:text-warning-dark">
             Algum ingrediente ainda não está vinculado ao estoque — o custo total pode estar incompleto.
-          </Text>
+          </AppText>
         ) : null}
         {!isNew ? (
           <Link href={`/recipes/${type}/${params.id}/cost-history`} asChild>
             <Pressable accessibilityRole="button" className="mt-2 min-h-[32px] justify-center">
-              <Text className="text-sm font-archivo-medium text-brand dark:text-brand-dark">Ver histórico de custo</Text>
+              <AppText className="text-sm font-archivo-medium text-brand dark:text-brand-dark">Ver histórico de custo</AppText>
             </Pressable>
           </Link>
         ) : null}
@@ -446,11 +457,11 @@ export default function RecipeEditorScreen() {
 
       {cmv.totalCost > 0 ? (
         <View className="mb-4 rounded-xl border border-surface-border dark:border-surface-border-dark p-3">
-          <Text className="mb-2 text-base font-archivo-semibold text-ink dark:text-ink-dark">
+          <AppText className="mb-2 text-base font-archivo-semibold text-ink dark:text-ink-dark">
             Calculadora de preço sugerido
-          </Text>
+          </AppText>
           <View className="mb-3 flex-row items-center gap-2">
-            <Text className="text-sm text-ink dark:text-ink-dark">CMV desejado (%)</Text>
+            <AppText className="text-sm text-ink dark:text-ink-dark">CMV desejado (%)</AppText>
             <TextInput
               accessibilityLabel="CMV desejado"
               keyboardType="decimal-pad"
@@ -469,17 +480,17 @@ export default function RecipeEditorScreen() {
               ] as const
             ).map((tier) => (
               <View key={tier.key} className="flex-1 items-center rounded-xl border border-surface-border dark:border-surface-border-dark p-2">
-                <Text className="text-xs text-ink-secondary dark:text-ink-secondary-dark">{tier.label}</Text>
-                <Text className="mb-2 text-base font-archivo-semibold text-ink dark:text-ink-dark">
+                <AppText className="text-xs text-ink-secondary dark:text-ink-secondary-dark">{tier.label}</AppText>
+                <AppText className="mb-2 text-base font-archivo-semibold text-ink dark:text-ink-dark">
                   R$ {tier.value.toFixed(2)}
-                </Text>
+                </AppText>
                 <Pressable
                   accessibilityRole="button"
                   accessibilityLabel={`Usar preço ${tier.label}`}
                   onPress={() => setValue('salePrice', tier.value)}
                   className="min-h-[32px] items-center justify-center rounded-lg bg-brand dark:bg-brand-dark px-2"
                 >
-                  <Text className="text-xs font-archivo-semibold text-white">Usar este preço</Text>
+                  <AppText className="text-xs font-archivo-semibold text-white">Usar este preço</AppText>
                 </Pressable>
               </View>
             ))}
@@ -520,7 +531,7 @@ export default function RecipeEditorScreen() {
         className="min-h-[80px] rounded-xl border border-surface-input-border dark:border-surface-border-dark px-4 py-3 text-base text-ink dark:text-ink-dark"
       />
 
-      <Text className="mb-3 mt-2 text-base font-archivo-semibold text-ink dark:text-ink-dark">Foto (opcional)</Text>
+      <AppText className="mb-3 mt-2 text-base font-archivo-semibold text-ink dark:text-ink-dark">Foto (opcional)</AppText>
       <View className="relative mb-4">
         <Pressable
           accessibilityRole="button"
@@ -531,7 +542,7 @@ export default function RecipeEditorScreen() {
           {displayedPhotoUri ? (
             <Image source={{ uri: displayedPhotoUri }} className="h-full w-full" resizeMode="cover" />
           ) : (
-            <Text className="text-sm text-ink-secondary dark:text-ink-secondary-dark">Toque para tirar ou escolher uma foto</Text>
+            <AppText className="text-sm text-ink-secondary dark:text-ink-secondary-dark">Toque para tirar ou escolher uma foto</AppText>
           )}
         </Pressable>
         {displayedPhotoUri ? (
@@ -541,12 +552,12 @@ export default function RecipeEditorScreen() {
             onPress={handleRemovePhoto}
             className="absolute right-2 top-2 h-9 w-9 items-center justify-center rounded-full bg-black/60"
           >
-            <Text className="text-base text-white">✕</Text>
+            <AppText className="text-base text-white">✕</AppText>
           </Pressable>
         ) : null}
       </View>
 
-      {formError ? <Text className="mb-4 text-sm text-danger dark:text-danger-dark">{formError}</Text> : null}
+      {formError ? <AppText className="mb-4 text-sm text-danger dark:text-danger-dark">{formError}</AppText> : null}
 
       {canWrite ? (
         <>

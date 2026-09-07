@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { ScrollView, Text } from 'react-native';
+import { ScrollView } from 'react-native';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { AppText } from '../../src/components/AppText';
 import { BackButton } from '../../src/components/BackButton';
 import { FormField } from '../../src/components/FormField';
 import { KeyboardAvoidingScreen } from '../../src/components/KeyboardAvoidingScreen';
@@ -35,10 +36,10 @@ export default function ForgotPasswordScreen() {
     return (
       <ScrollView className="flex-1 bg-surface-card dark:bg-surface-card-dark" contentContainerClassName="flex-grow justify-center px-6">
         <BackButton />
-        <Text className="mb-3 text-2xl font-archivo-bold text-ink dark:text-ink-dark">Email enviado</Text>
-        <Text className="text-base text-ink-secondary dark:text-ink-secondary-dark">
+        <AppText className="mb-3 text-2xl font-archivo-bold text-ink dark:text-ink-dark">Email enviado</AppText>
+        <AppText className="text-base text-ink-secondary dark:text-ink-secondary-dark">
           Se existir uma conta com esse email, você vai receber um link para criar uma nova senha.
-        </Text>
+        </AppText>
       </ScrollView>
     );
   }
@@ -46,10 +47,10 @@ export default function ForgotPasswordScreen() {
   return (
     <KeyboardAvoidingScreen className="flex-1 bg-surface-card dark:bg-surface-card-dark" contentContainerClassName="flex-grow justify-center px-6 py-12">
       <BackButton />
-      <Text className="mb-3 text-2xl font-archivo-bold text-ink dark:text-ink-dark">Esqueci minha senha</Text>
-      <Text className="mb-6 text-base text-ink-secondary dark:text-ink-secondary-dark">
+      <AppText className="mb-3 text-2xl font-archivo-bold text-ink dark:text-ink-dark">Esqueci minha senha</AppText>
+      <AppText className="mb-6 text-base text-ink-secondary dark:text-ink-secondary-dark">
         Informe o email da sua conta. Vamos enviar um link para você criar uma nova senha.
-      </Text>
+      </AppText>
 
       <FormField
         control={control}
@@ -60,7 +61,7 @@ export default function ForgotPasswordScreen() {
         keyboardType="email-address"
       />
 
-      {formError ? <Text className="mb-4 text-sm text-danger dark:text-danger-dark">{formError}</Text> : null}
+      {formError ? <AppText className="mb-4 text-sm text-danger dark:text-danger-dark">{formError}</AppText> : null}
 
       <PrimaryButton label="Enviar link" onPress={handleSubmit(onSubmit)} loading={isSubmitting} />
     </KeyboardAvoidingScreen>

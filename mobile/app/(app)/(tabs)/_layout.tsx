@@ -1,7 +1,7 @@
-import { Text } from 'react-native';
 import { Tabs } from 'expo-router';
 import { useColorScheme } from 'nativewind';
 import { Home, Package, Users, User } from 'lucide-react-native';
+import { AppText } from '../../../src/components/AppText';
 import { useAuthStore } from '../../../src/features/auth/store';
 import { canManageBusiness, resolveAppRole } from '../../../src/features/team/permissions';
 
@@ -43,12 +43,12 @@ export default function TabsLayout() {
         // Estado ativo nunca é só cor (mesma regra de src/features/inventory/stockStatus.ts
         // e src/features/recipes/cmv.ts) — reforça com peso de fonte.
         tabBarLabel: ({ focused, color, children }) => (
-          <Text
+          <AppText
             className={focused ? 'text-xs font-archivo-semibold' : 'text-xs font-archivo'}
             style={{ color }}
           >
             {children}
-          </Text>
+          </AppText>
         ),
       }}
     >

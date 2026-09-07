@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Pressable, Text, TextInput, View, type TextInputProps } from 'react-native';
+import { Pressable, TextInput, View, type TextInputProps } from 'react-native';
 import { Controller, type Control, type FieldValues, type Path } from 'react-hook-form';
+import { AppText } from './AppText';
 
 type FormFieldProps<T extends FieldValues> = TextInputProps & {
   control: Control<T>;
@@ -34,7 +35,7 @@ export function FormField<T extends FieldValues>({
       name={name}
       render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
         <View className="mb-4">
-          <Text className="mb-1 font-archivo-semibold text-base text-ink dark:text-ink-dark">{label}</Text>
+          <AppText className="mb-1 font-archivo-semibold text-base text-ink dark:text-ink-dark">{label}</AppText>
           <View className="relative justify-center">
             <TextInput
               accessibilityLabel={label}
@@ -57,14 +58,14 @@ export function FormField<T extends FieldValues>({
                 onPress={() => setRevealed((v) => !v)}
                 className="absolute right-2 h-11 items-center justify-center px-2"
               >
-                <Text className="text-sm font-archivo-medium text-brand dark:text-brand-dark">{revealed ? 'Ocultar' : 'Mostrar'}</Text>
+                <AppText className="text-sm font-archivo-medium text-brand dark:text-brand-dark">{revealed ? 'Ocultar' : 'Mostrar'}</AppText>
               </Pressable>
             ) : null}
           </View>
           {error?.message ? (
-            <Text className="mt-1 text-sm text-danger dark:text-danger-dark">{error.message}</Text>
+            <AppText className="mt-1 text-sm text-danger dark:text-danger-dark">{error.message}</AppText>
           ) : hint ? (
-            <Text className="mt-1 text-sm text-ink-secondary dark:text-ink-secondary-dark">{hint}</Text>
+            <AppText className="mt-1 text-sm text-ink-secondary dark:text-ink-secondary-dark">{hint}</AppText>
           ) : null}
         </View>
       )}

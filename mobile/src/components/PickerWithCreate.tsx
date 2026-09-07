@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Pressable, Text, TextInput, View } from 'react-native';
+import { Pressable, TextInput, View } from 'react-native';
 import { Controller, type Control, type FieldValues, type Path } from 'react-hook-form';
+import { AppText } from './AppText';
 
 type Option = { id: string; name: string };
 
@@ -38,7 +39,7 @@ export function PickerWithCreate<T extends FieldValues>({
       name={name}
       render={({ field: { onChange, value }, fieldState: { error } }) => (
         <View className="mb-4">
-          <Text className="mb-1 text-base text-ink dark:text-ink-dark">{label}</Text>
+          <AppText className="mb-1 text-base text-ink dark:text-ink-dark">{label}</AppText>
           <View className="flex-row flex-wrap gap-2">
             {options.map((option) => {
               const selected = value === option.id;
@@ -56,13 +57,13 @@ export function PickerWithCreate<T extends FieldValues>({
                       : 'border-surface-input-border dark:border-surface-border-dark bg-surface-card dark:bg-surface-card-dark')
                   }
                 >
-                  <Text
+                  <AppText
                     className={
                       selected ? 'text-sm font-archivo-semibold text-white' : 'text-sm text-ink dark:text-ink-dark'
                     }
                   >
                     {option.name}
-                  </Text>
+                  </AppText>
                 </Pressable>
               );
             })}
@@ -72,10 +73,10 @@ export function PickerWithCreate<T extends FieldValues>({
               onPress={() => setCreating(true)}
               className="min-h-[44px] items-center justify-center rounded-full border border-dashed border-surface-input-border dark:border-surface-border-dark px-4 py-2"
             >
-              <Text className="text-sm text-ink-secondary dark:text-ink-secondary-dark">+ Nova</Text>
+              <AppText className="text-sm text-ink-secondary dark:text-ink-secondary-dark">+ Nova</AppText>
             </Pressable>
           </View>
-          {error?.message ? <Text className="mt-1 text-sm text-danger dark:text-danger-dark">{error.message}</Text> : null}
+          {error?.message ? <AppText className="mt-1 text-sm text-danger dark:text-danger-dark">{error.message}</AppText> : null}
 
           {creating ? (
             <View className="mt-2 flex-row items-center gap-2">
@@ -106,7 +107,7 @@ export function PickerWithCreate<T extends FieldValues>({
                 }}
                 className="h-11 w-11 items-center justify-center rounded-xl bg-brand dark:bg-brand-dark"
               >
-                <Text className="text-lg text-white">✓</Text>
+                <AppText className="text-lg text-white">✓</AppText>
               </Pressable>
             </View>
           ) : null}

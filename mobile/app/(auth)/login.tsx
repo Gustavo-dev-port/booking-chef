@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 import { Link } from 'expo-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { AppText } from '../../src/components/AppText';
 import { FormField } from '../../src/components/FormField';
 import { KeyboardAvoidingScreen } from '../../src/components/KeyboardAvoidingScreen';
 import { PrimaryButton } from '../../src/components/PrimaryButton';
@@ -36,7 +37,7 @@ export default function LoginScreen() {
 
   return (
     <KeyboardAvoidingScreen className="flex-1 bg-surface-card dark:bg-surface-card-dark" contentContainerClassName="flex-grow justify-center px-6 py-12">
-      <Text className="mb-8 text-2xl font-archivo-bold text-ink dark:text-ink-dark">Entrar</Text>
+      <AppText className="mb-8 text-2xl font-archivo-bold text-ink dark:text-ink-dark">Entrar</AppText>
 
       <FormField
         control={control}
@@ -55,19 +56,19 @@ export default function LoginScreen() {
         autoComplete="current-password"
       />
 
-      {formError ? <Text className="mb-4 text-sm text-danger dark:text-danger-dark">{formError}</Text> : null}
+      {formError ? <AppText className="mb-4 text-sm text-danger dark:text-danger-dark">{formError}</AppText> : null}
 
       <View className="mb-3">
         <PrimaryButton label="Entrar" onPress={handleSubmit(onSubmit)} loading={isSubmitting} />
       </View>
 
       <Link href="/forgot-password" asChild>
-        <Text
+        <AppText
           accessibilityRole="link"
           className="mb-3 min-h-[44px] py-3 text-center text-sm text-brand dark:text-brand-dark"
         >
           Esqueci minha senha
-        </Text>
+        </AppText>
       </Link>
 
       <Link href="/signup" asChild>

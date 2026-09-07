@@ -1,4 +1,5 @@
-import { Image, Pressable, Text, View } from 'react-native';
+import { Image, Pressable, View } from 'react-native';
+import { AppText } from './AppText';
 import { useRecipePhotoUrl } from '../hooks/useRecipePhotoUrl';
 import type { RecipeSummary } from '../features/recipes/api';
 
@@ -21,17 +22,17 @@ export function RecipeCard({ recipe, onPress }: RecipeCardProps) {
         <Image source={{ uri: photoUrl }} className="h-14 w-14 rounded-xl bg-surface-alt dark:bg-surface-card-dark" />
       ) : (
         <View className="h-14 w-14 items-center justify-center rounded-xl bg-surface-alt dark:bg-surface-card-dark">
-          <Text className="text-xl">🍽️</Text>
+          <AppText className="text-xl">🍽️</AppText>
         </View>
       )}
       <View className="flex-1">
-        <Text className="text-base font-archivo-semibold text-ink dark:text-ink-dark" numberOfLines={1}>
+        <AppText className="text-base font-archivo-semibold text-ink dark:text-ink-dark" numberOfLines={1}>
           {recipe.name}
-        </Text>
+        </AppText>
         {recipe.category ? (
-          <Text className="mt-0.5 text-sm text-ink-secondary dark:text-ink-secondary-dark" numberOfLines={1}>
+          <AppText className="mt-0.5 text-sm text-ink-secondary dark:text-ink-secondary-dark" numberOfLines={1}>
             {recipe.category}
-          </Text>
+          </AppText>
         ) : null}
       </View>
     </Pressable>

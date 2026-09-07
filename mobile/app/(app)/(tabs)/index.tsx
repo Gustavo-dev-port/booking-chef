@@ -1,12 +1,15 @@
 import { useCallback, useMemo, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Link, useFocusEffect, useRouter } from 'expo-router';
 import { BookOpen, ChefHat, Martini } from 'lucide-react-native';
+import { AppText } from '../../../src/components/AppText';
 import { ModuleCard } from '../../../src/components/ModuleCard';
 import { RecipeCard } from '../../../src/components/RecipeCard';
 import { listRecentRecipes, type RecipeSummary } from '../../../src/features/recipes/api';
 import { useAuthStore } from '../../../src/features/auth/store';
 import { resolveAppRole, canAccessRecipeType } from '../../../src/features/team/permissions';
+import { listEntranceDelay } from '../../../src/features/ui/listEntrance';
 
 /**
  * Home: módulos Bar/Cozinha navegam pra lista de fichas filtrada por type;
@@ -38,8 +41,8 @@ export default function HomeScreen() {
   return (
     <ScrollView className="flex-1 bg-surface-page dark:bg-surface-page-dark" contentContainerClassName="p-4 pt-16">
       <View className="mb-6">
-        <Text className="mb-1 font-display text-4xl text-ink dark:text-ink-dark">Fichas técnicas</Text>
-        <Text className="text-base text-ink-secondary dark:text-ink-secondary-dark">O caderno digital de receitas do seu estabelecimento</Text>
+        <AppText className="mb-1 font-display text-4xl text-ink dark:text-ink-dark">Fichas técnicas</AppText>
+        <AppText className="text-base text-ink-secondary dark:text-ink-secondary-dark">O caderno digital de receitas do seu estabelecimento</AppText>
       </View>
 
       <View className="flex-row gap-3">
@@ -66,14 +69,16 @@ export default function HomeScreen() {
         <View className="flex-1" />
       </View>
 
-      <Text className="mb-3 mt-8 text-sm font-archivo-semibold text-ink-secondary dark:text-ink-secondary-dark">Últimas fichas editadas</Text>
+      <AppText className="mb-3 mt-8 text-sm font-archivo-semibold text-ink-secondary dark:text-ink-secondary-dark">Últimas fichas editadas</AppText>
       {recent.length === 0 ? (
-        <Text className="text-sm text-ink-secondary dark:text-ink-secondary-dark">Nenhuma ficha editada ainda</Text>
+        <AppText className="text-sm text-ink-secondary dark:text-ink-secondary-dark">Nenhuma ficha editada ainda</AppText>
       ) : (
-        recent.map((recipe) => (
-          <Link key={recipe.id} href={`/recipes/${recipe.type}/${recipe.id}`} asChild>
-            <RecipeCard recipe={recipe} onPress={() => {}} />
-          </Link>
+        recent.map((recipe, index) => (
+          <Animated.View key={recipe.id} entering={FadeInDown.delay(listEntranceDelay(index)).duration(220)}>
+            <Link href={`/recipes/${recipe.type}/${recipe.id}`} asChild>
+              <RecipeCard recipe={recipe} onPress={() => {}} />
+            </Link>
+          </Animated.View>
         ))
       )}
     </ScrollView>

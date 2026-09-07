@@ -1,4 +1,5 @@
-import { ActivityIndicator, Pressable, Text } from 'react-native';
+import { ActivityIndicator, Pressable } from 'react-native';
+import { AppText } from './AppText';
 
 type PrimaryButtonProps = {
   label: string;
@@ -17,6 +18,9 @@ const COLORS = {
     border: 'border-brand dark:border-brand-dark',
     activeBg: 'active:bg-warning-bg dark:active:bg-surface-border-dark',
     text: 'text-brand dark:text-brand-dark',
+    // Off-white do mock em vez de branco puro (Design System v1, "05 ·
+    // Componentes") — mesmo tom que o spinner de loading já usava abaixo.
+    onSolidText: 'text-[#FFF4EA]',
     hex: '#C2551F',
   },
   danger: {
@@ -24,6 +28,7 @@ const COLORS = {
     border: 'border-danger dark:border-danger-dark',
     activeBg: 'active:bg-danger-bg dark:active:bg-surface-border-dark',
     text: 'text-danger dark:text-danger-dark',
+    onSolidText: 'text-[#FFF1EF]',
     hex: '#A82D22',
   },
 };
@@ -69,7 +74,7 @@ export function PrimaryButton({
       {loading ? (
         <ActivityIndicator color={isSolid ? '#FFF4EA' : colors.hex} />
       ) : (
-        <Text className={`font-archivo-semibold text-base ${isSolid ? 'text-white' : colors.text}`}>{label}</Text>
+        <AppText className={`font-archivo-semibold text-base ${isSolid ? colors.onSolidText : colors.text}`}>{label}</AppText>
       )}
     </Pressable>
   );

@@ -1,6 +1,7 @@
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { useColorScheme } from 'nativewind';
 import type { LucideIcon } from 'lucide-react-native';
+import { AppText } from './AppText';
 
 type ModuleCardProps = {
   icon: LucideIcon;
@@ -30,8 +31,8 @@ export function ModuleCard({ icon: Icon, title, subtitle, onPress }: ModuleCardP
       <View className="mb-3 h-12 w-12 items-center justify-center rounded-full bg-surface-alt dark:bg-surface-border-dark">
         <Icon size={24} color={iconColor} strokeWidth={1.8} />
       </View>
-      <Text className="font-archivo-bold text-base text-ink dark:text-ink-dark">{title}</Text>
-      <Text className="mt-1 text-center text-sm text-ink-secondary dark:text-ink-secondary-dark">{subtitle}</Text>
+      <AppText className="font-archivo-bold text-base text-ink dark:text-ink-dark">{title}</AppText>
+      <AppText className="mt-1 text-center text-sm text-ink-secondary dark:text-ink-secondary-dark">{subtitle}</AppText>
     </Pressable>
   );
 }

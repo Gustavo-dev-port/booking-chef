@@ -1,4 +1,5 @@
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, View } from 'react-native';
+import { AppText } from './AppText';
 import type { InventoryItem } from '../features/inventory/api';
 import { ingredientUnitLabel } from '../validators/recipe';
 import { computeStockStatus, STOCK_STATUS_CLASSES, STOCK_STATUS_LABELS } from '../features/inventory/stockStatus';
@@ -26,26 +27,26 @@ export function InventoryItemCard({ item, categoryName, onPress }: InventoryItem
       className="mb-3 min-h-[44px] flex-row items-center justify-between gap-3 rounded-2xl border border-surface-border dark:border-surface-border-dark bg-surface-card dark:bg-surface-card-dark p-3 active:bg-surface-alt dark:active:bg-surface-page-dark"
     >
       <View className="flex-1">
-        <Text className="font-archivo-bold text-base text-ink dark:text-ink-dark" numberOfLines={1}>
+        <AppText className="font-archivo-bold text-base text-ink dark:text-ink-dark" numberOfLines={1}>
           {item.name}
-        </Text>
+        </AppText>
         {categoryName ? (
-          <Text className="mt-0.5 text-sm text-ink-secondary dark:text-ink-secondary-dark" numberOfLines={1}>
+          <AppText className="mt-0.5 text-sm text-ink-secondary dark:text-ink-secondary-dark" numberOfLines={1}>
             {categoryName}
-          </Text>
+          </AppText>
         ) : null}
       </View>
       <View className="items-end gap-1">
-        <Text className="text-base font-archivo-semibold text-ink dark:text-ink-dark">
+        <AppText className="text-base font-archivo-semibold text-ink dark:text-ink-dark">
           {item.current_quantity} {unitLabel}
-        </Text>
-        <Text className="text-xs text-ink-secondary dark:text-ink-secondary-dark">
+        </AppText>
+        <AppText className="text-xs text-ink-secondary dark:text-ink-secondary-dark">
           mín. {item.minimum_quantity} {unitLabel}
-        </Text>
+        </AppText>
         <View className={`rounded-lg px-2 py-0.5 ${STOCK_STATUS_CLASSES[status]}`}>
-          <Text className={`font-archivo-bold text-xs ${STOCK_STATUS_CLASSES[status]}`}>
+          <AppText className={`font-archivo-bold text-xs ${STOCK_STATUS_CLASSES[status]}`}>
             {STOCK_STATUS_LABELS[status]}
-          </Text>
+          </AppText>
         </View>
       </View>
     </Pressable>

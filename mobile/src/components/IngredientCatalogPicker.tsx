@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { FlatList, Modal, Pressable, Text, TextInput, View } from 'react-native';
+import { FlatList, Modal, Pressable, TextInput, View } from 'react-native';
+import { AppText } from './AppText';
 import type { InventoryItem } from '../features/inventory/api';
 import { ingredientUnitLabel } from '../validators/recipe';
 
@@ -28,15 +29,15 @@ export function IngredientCatalogPicker({ items, onSelect }: IngredientCatalogPi
         onPress={() => setOpen(true)}
         className="min-h-[44px] items-center justify-center rounded-xl border border-dashed border-brand dark:border-brand-dark px-3"
       >
-        <Text className="text-sm font-archivo-medium text-brand dark:text-brand-dark">🔗 Estoque</Text>
+        <AppText className="text-sm font-archivo-medium text-brand dark:text-brand-dark">🔗 Estoque</AppText>
       </Pressable>
 
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
         <Pressable accessibilityLabel="Fechar" className="flex-1 justify-end bg-black/40" onPress={() => setOpen(false)}>
           <View className="max-h-[70%] rounded-t-2xl bg-surface-card dark:bg-surface-card-dark p-4">
-            <Text className="mb-2 text-base font-archivo-semibold text-ink dark:text-ink-dark">
+            <AppText className="mb-2 text-base font-archivo-semibold text-ink dark:text-ink-dark">
               Selecionar do estoque
-            </Text>
+            </AppText>
             <TextInput
               accessibilityLabel="Buscar insumo"
               placeholder="Buscar insumo"
@@ -59,20 +60,20 @@ export function IngredientCatalogPicker({ items, onSelect }: IngredientCatalogPi
                   }}
                   className="min-h-[44px] flex-row items-center justify-between border-b border-surface-border dark:border-surface-border-dark py-3"
                 >
-                  <Text className="flex-1 pr-2 text-base text-ink dark:text-ink-dark" numberOfLines={1}>
+                  <AppText className="flex-1 pr-2 text-base text-ink dark:text-ink-dark" numberOfLines={1}>
                     {item.name}
-                  </Text>
-                  <Text className="text-sm text-ink-secondary dark:text-ink-secondary-dark">
+                  </AppText>
+                  <AppText className="text-sm text-ink-secondary dark:text-ink-secondary-dark">
                     R$ {(item.unit_cost ?? 0).toFixed(2)}/{ingredientUnitLabel(item.usage_unit)}
-                  </Text>
+                  </AppText>
                 </Pressable>
               )}
               ListEmptyComponent={
-                <Text className="py-4 text-center text-sm text-ink-secondary dark:text-ink-secondary-dark">
+                <AppText className="py-4 text-center text-sm text-ink-secondary dark:text-ink-secondary-dark">
                   {items.length === 0
                     ? 'Nenhum insumo cadastrado no estoque ainda.'
                     : 'Nenhum insumo encontrado.'}
-                </Text>
+                </AppText>
               }
             />
           </View>

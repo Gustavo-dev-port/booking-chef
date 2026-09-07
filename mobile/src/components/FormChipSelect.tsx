@@ -1,5 +1,6 @@
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { Controller, type Control, type FieldValues, type Path } from 'react-hook-form';
+import { AppText } from './AppText';
 
 type Option = { value: string; label: string };
 
@@ -22,7 +23,7 @@ export function FormChipSelect<T extends FieldValues>({ control, name, label, op
       name={name}
       render={({ field: { onChange, value }, fieldState: { error } }) => (
         <View className="mb-4">
-          <Text className="mb-1 text-base text-ink dark:text-ink-dark">{label}</Text>
+          <AppText className="mb-1 text-base text-ink dark:text-ink-dark">{label}</AppText>
           <View className="flex-row flex-wrap gap-2">
             {options.map((option) => {
               const selected = value === option.value;
@@ -38,14 +39,14 @@ export function FormChipSelect<T extends FieldValues>({ control, name, label, op
                     (selected ? 'border-brand dark:border-brand-dark bg-brand dark:bg-brand-dark' : 'border-surface-input-border dark:border-surface-border-dark bg-surface-card dark:bg-surface-card-dark')
                   }
                 >
-                  <Text className={selected ? 'text-sm font-archivo-semibold text-white' : 'text-sm text-ink dark:text-ink-dark'}>
+                  <AppText className={selected ? 'text-sm font-archivo-semibold text-white' : 'text-sm text-ink dark:text-ink-dark'}>
                     {option.label}
-                  </Text>
+                  </AppText>
                 </Pressable>
               );
             })}
           </View>
-          {error?.message ? <Text className="mt-1 text-sm text-danger dark:text-danger-dark">{error.message}</Text> : null}
+          {error?.message ? <AppText className="mt-1 text-sm text-danger dark:text-danger-dark">{error.message}</AppText> : null}
         </View>
       )}
     />

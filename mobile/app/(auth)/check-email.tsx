@@ -1,5 +1,6 @@
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 import { Link, useLocalSearchParams } from 'expo-router';
+import { AppText } from '../../src/components/AppText';
 import { PrimaryButton } from '../../src/components/PrimaryButton';
 
 /**
@@ -13,11 +14,11 @@ export default function CheckEmailScreen() {
 
   return (
     <View className="flex-1 justify-center bg-surface-card dark:bg-surface-card-dark px-6">
-      <Text className="mb-3 text-2xl font-archivo-bold text-ink dark:text-ink-dark">Confirme seu email</Text>
-      <Text className="mb-8 text-base text-ink-secondary dark:text-ink-secondary-dark">
+      <AppText className="mb-3 text-2xl font-archivo-bold text-ink dark:text-ink-dark">Confirme seu email</AppText>
+      <AppText className="mb-8 text-base text-ink-secondary dark:text-ink-secondary-dark">
         Enviamos um link de confirmação{email ? ` para ${email}` : ''}. Abra o email e toque no link
         para poder entrar no app.
-      </Text>
+      </AppText>
 
       <Link href="/login" asChild>
         <PrimaryButton label="Voltar para o login" variant="outline" />
