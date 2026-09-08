@@ -1,5 +1,6 @@
 import { supabase } from '../../lib/supabase';
 import type { InventoryItemInput } from '../../validators/inventory';
+import { logEvent } from '../analytics/events';
 
 export type NamedOption = { id: string; name: string };
 
@@ -65,12 +66,25 @@ function toIngredientRow(input: InventoryItemInput) {
 }
 
 export async function createInventoryItem(companyId: string, input: InventoryItemInput): Promise<string> {
+  // Checado ANTES do insert, de propósito — depois de inserir, essa
+  // empresa sempre teria >= 1 insumo, e "first_ingredient_created"
+  // deixaria de conseguir distinguir o primeiro dos demais.
+  const { count } = await supabase
+    .from('ingredients')
+    .select('id', { count: 'exact', head: true })
+    .eq('company_id', companyId);
+  const isFirst = (count ?? 0) === 0;
+
   const { data, error } = await supabase
     .from('ingredients')
     .insert({ ...toIngredientRow(input), company_id: companyId })
     .select('id')
     .single();
   if (error) throw new Error(error.message);
+
+  void logEvent('ingredient_created', { companyId });
+  if (isFirst) void logEvent('first_ingredient_created', { companyId });
+
   return data.id;
 }
 
