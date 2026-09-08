@@ -38,6 +38,14 @@ Implementada como uma Edge Function dedicada (`delete-account`, ver §5 e `06_AR
 
 **V2 — nuance a resolver:** quando existir mais de um usuário por empresa, "excluir minha conta" precisa distinguir claramente entre *sair da equipe* (remove só o vínculo da pessoa) e *excluir a empresa inteira* (só o proprietário pode, e afeta todos os membros) — este documento sinaliza a decisão como pendente de especificação antes da implementação da V2, para não ser resolvida de forma improvisada em código.
 
+### 1.4 Dado de assinatura/pagamento (categoria nova, ainda sem implementação — Épico 14)
+
+Achado ao verificar `13_MONETIZACAO_VENDAS.md`: esse documento descreve cobrança recorrente (Free/Basic/Premium), mas nenhuma linha deste pacote de segurança cobria dado financeiro/de assinatura como categoria própria. Registrado aqui agora, antes de existir código, para a implementação do Épico 14 (`11_BACKLOG.md` §6) nascer já dentro da mesma disciplina do resto do produto, em vez de essa lacuna só ser notada depois de já estar em produção:
+
+- **Número de cartão/dado de pagamento em si nunca deve tocar o app nem o Supabase.** A cobrança passa pelo Google Play Billing (`13_MONETIZACAO_VENDAS.md` §4.1) — o app só recebe de volta um identificador de assinatura/recibo do Google, nunca o dado bruto do cartão. Isso evita colocar o produto em escopo de PCI-DSS, e é uma decisão de arquitetura, não só uma prática recomendada.
+- **O que o Booking Chef vai armazenar de fato** (quando o Épico 14 existir): plano vigente por empresa, status da assinatura (ativa/trial/cancelada/inadimplente), datas de início/renovação/fim de trial, e o identificador de assinatura da Play Store — nenhum dado bancário. Esses campos são dado pessoal/comercial sob LGPD (identificam capacidade de pagamento e comportamento de compra do titular), mesmo não sendo dado financeiro sensível no sentido de PCI — precisam de base legal (execução de contrato, já que é o que sustenta o serviço pago) e do mesmo tratamento de RLS por `company_id` já usado em todo o resto do schema.
+- **Retenção:** segue o mesmo princípio de soft-delete já usado em todo o produto (nunca apagar histórico de cobrança silenciosamente) — mas exclusão de conta (§1.3) continua tendo que apagar/anonimizar esse histórico também, já que é a mesma pessoa exercendo o direito à eliminação; a Edge Function `delete-account` precisa ser estendida quando o Épico 14 existir, não esquecida.
+
 ## 2. Criptografia
 
 | Camada | Mecanismo |

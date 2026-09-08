@@ -1,6 +1,7 @@
 import { supabase } from '../../lib/supabase';
 import type { IngredientRowInput, RecipeInput, RecipeType } from '../../validators/recipe';
 import { reconcileIngredients } from './reconciliation';
+import { logEvent } from '../analytics/events';
 
 export type RecipeSummary = {
   id: string;
@@ -124,6 +125,17 @@ function toProductRow(input: RecipeInput) {
 
 /** @returns o id do novo produto. */
 export async function createRecipe(companyId: string, type: RecipeType, input: RecipeInput): Promise<string> {
+  // Mesma lógica de src/features/inventory/api.ts (createInventoryItem):
+  // conta ANTES de inserir, e só entre bar/cozinha — uma linha de
+  // cardápio digital legado (type nulo, ver docs/07_DATABASE.md) não é
+  // uma "ficha técnica" pro funil do app mobile.
+  const { count } = await supabase
+    .from('products')
+    .select('id', { count: 'exact', head: true })
+    .eq('company_id', companyId)
+    .in('type', ['bar', 'cozinha']);
+  const isFirst = (count ?? 0) === 0;
+
   const { data, error } = await supabase
     .from('products')
     .insert({ ...toProductRow(input), company_id: companyId, type })
@@ -132,6 +144,10 @@ export async function createRecipe(companyId: string, type: RecipeType, input: R
   if (error) throw new Error(error.message);
 
   await replaceIngredients(companyId, data.id, input.ingredients);
+
+  void logEvent('product_created', { companyId, metadata: { type } });
+  if (isFirst) void logEvent('first_product_created', { companyId, metadata: { type } });
+
   return data.id;
 }
 
