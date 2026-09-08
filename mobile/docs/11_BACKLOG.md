@@ -12,6 +12,7 @@ data: "30 de agosto de 2026"
 1. [Épicos concluídos (V1 — referência)](#1-épicos-concluídos-v1--referência)
 2. [Épicos da V2 (detalhados nesta rodada)](#2-épicos-da-v2-detalhados-nesta-rodada)
 3. [Épicos da V3 (não detalhados nesta rodada)](#3-épicos-da-v3-não-detalhados-nesta-rodada)
+   - [2b. Épico 09 — Produção (detalhado, início da V3)](#2b-épico-09--produção-detalhado-nesta-rodada-início-da-v3)
 4. [Resumo MoSCoW](#4-resumo-moscow)
 5. [Sprints](#5-sprints)
 
@@ -62,13 +63,24 @@ Mantidos aqui por rastreabilidade — não competem por sprint, já estão em pr
 
 ## 3. Épicos da V3 (não detalhados nesta rodada)
 
+> **Atualização (Sprint 6):** a V2 foi mergeada em `master` (Estoque, CMV/Precificação, Equipe/Permissões) e já tem uma build de teste ponta a ponta distribuída. O Épico 09 — Produção deixou de depender de "V2 em uso real por um tempo" porque seu único pré-requisito técnico é o schema de Estoque+CMV existir (já existe) — o roadmap (`10_ROADMAP.md`) já registrava esse épico como o primeiro item da V3, sem depender de dado histórico como os Épicos 10/11. Por isso ele foi detalhado nesta rodada (ver §2b) e sai da tabela abaixo; 10–13 continuam bloqueados pelos motivos originais.
+
 | Épico | Escopo | Motivo de não detalhar agora |
 |---|---|---|
-| 09 — Produção | Registro de produção, baixa automática de estoque | Depende da V2 (estoque + CMV) estar em uso real antes de detalhar histórias com precisão |
-| 10 — Lista de Compras | Sugestão automática a partir de insumos críticos | Mesma dependência do Épico 09 |
+| 10 — Lista de Compras | Sugestão automática a partir de insumos críticos | Depende do ciclo Produção→Estoque estar validado em uso real antes de virar sugestão automática e prescritiva (`10_ROADMAP.md`, §3) |
 | 11 — Dashboard e BI | Indicadores consolidados | Depende de volume de dado real de produção/estoque para os indicadores terem sentido |
 | 12 — Offline First | SQLite, fila, sincronização, resolução de conflito | Módulo de risco técnico mais alto do roadmap — merece um documento de descoberta técnica dedicado antes de virar histórias de sprint |
 | 13 — IA para Precificação | Sugestão assistida por modelo | Depende de decisão de produto ainda em aberto (`10_ROADMAP.md`, nota final) |
+
+## 2b. Épico 09 — Produção (detalhado nesta rodada, início da V3)
+
+> **Escopo desta rodada:** só o caminho "produzir uma ficha técnica vendável" (`products`), que é exatamente o que `01_PRD.md` CU-09 pede — registrar o que foi de fato produzido baixa o estoque dos insumos vinculados, na proporção da receita. **Fora do escopo, deliberadamente:** receitas de produção internas/sub-receitas (ex.: "Xarope de gengibre" como um insumo que por sua vez é produzido a partir de outros insumos, cadastrado como `production_recipes` em `07_DATABASE.md` §4) — aumentaria o escopo com um catálogo novo (receita interna, insumo produzido, rendimento) sem estar no caminho crítico do CU-09; vai para "Could have" abaixo, e só vira história de verdade se a demanda real aparecer depois que o caminho simples estiver validado em uso — mesma disciplina de corte de escopo já aplicada em outras decisões deste pacote.
+
+| ID | História | Critério de aceite (resumo) | Prioridade | Story Points |
+|---|---|---|---|---|
+| 09.1 | Como cozinheiro/bartender, quero registrar que produzi uma quantidade de uma ficha técnica, para que o estoque dos insumos usados seja baixado automaticamente. | Cada insumo vinculado é descontado na proporção quantidade-da-receita × quantidade produzida; insumo em texto livre (sem vínculo de estoque) é ignorado, não bloqueia o registro. | Must | 5 |
+| 09.2 | Como proprietário/gerente, quero ver o histórico de produções de uma ficha técnica, para acompanhar o que foi produzido, quando e por quem. | Lista cronológica com quantidade, autor e data; nunca editável nem apagável (mesmo padrão de `inventory_movements`). | Must | 3 |
+| 09.3 | Como cozinheiro/bartender, quero ver, antes de confirmar, quais insumos serão consumidos e se algum ficará com saldo insuficiente, para não tentar registrar uma produção que o estoque real não sustenta. | Prévia calculada em tempo real ao digitar a quantidade; insumo com saldo insuficiente é destacado antes da confirmação. | Should | 3 |
 
 ## 4. Resumo MoSCoW
 
@@ -77,22 +89,25 @@ Mantidos aqui por rastreabilidade — não competem por sprint, já estão em pr
 - 06.1 Cadastro de insumo · 06.2 Movimentação de estoque · 06.3 Histórico de movimentações
 - 07.1 Seleção assistida de ingrediente · 07.2 Cálculo de custo/CMV em tempo real · 07.3 Snapshot de custo
 - 08.1 Convite de funcionário · 08.2 Ativação de conta convidada · 08.3 Restrição de acesso por papel
+- 09.1 Registro de produção com baixa automática de estoque · 09.2 Histórico de produção
 
 ### Should have
 
 - 06.4 Alerta de insumo abaixo do mínimo
 - 07.4 Calculadora de preço sugerido
 - 08.4 Remoção de acesso de funcionário
+- 09.3 Prévia de consumo/saldo insuficiente antes de confirmar a produção
 
 ### Could have
 
 - Leitura de código de barras no cadastro de insumo
 - Edição de papel de um funcionário já ativo (troca de cargo pós-convite)
 - Exportação do histórico de movimentações em CSV
+- Receitas de produção internas/sub-receitas (Épico 09b — ver nota de escopo em §2b)
 
 ### Won't have (neste ciclo)
 
-- Produção, Lista de Compras, Dashboard, Offline First, IA para Precificação (Épicos 09–13, ver §3)
+- Lista de Compras, Dashboard, Offline First, IA para Precificação (Épicos 10–13, ver §3)
 - PDV, módulo fiscal, delivery, financeiro completo (fora do escopo do produto — `01_PRD.md`, §12)
 
 ## 5. Sprints
@@ -106,5 +121,8 @@ Sprints de 2 semanas; capacidade de referência ~18–20 story points/sprint (aj
 | **Sprint 3** | CMV em tempo real | 07.1 · 07.2 | 13 |
 | **Sprint 4** | Precificação + início de Equipe | 07.3 · 07.4 · 08.1 | 16 |
 | **Sprint 5** | Equipe completa + fechamento da V2 | 08.2 · 08.3 · 08.4 · regressão e QA de ponta a ponta da V2 | 11 |
+| **Sprint 6** | Início da V3 — Produção (Épico 09) | 09.1 · 09.3 · 09.2 | 11 |
 
 **Marco de saída da V2:** ao final do Sprint 5, um estabelecimento piloto deve conseguir cadastrar insumos, vincular ingredientes na ficha técnica, ver CMV em tempo real, consultar preço sugerido, e convidar/gerenciar ao menos um funcionário com papel restrito — validando o objetivo da V2 registrado em `10_ROADMAP.md`.
+
+**Marco de saída do Sprint 6 (V3, primeiro épico):** um estabelecimento piloto deve conseguir registrar que produziu N porções de uma ficha técnica e ver o estoque dos insumos vinculados cair automaticamente e de forma auditável — sem isso, os Épicos 10 (Lista de Compras) e 11 (Dashboard) da V3 não têm dado real de produção para se apoiar.

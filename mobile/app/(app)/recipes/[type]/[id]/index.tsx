@@ -564,6 +564,24 @@ export default function RecipeEditorScreen() {
           <View className="mb-3">
             <PrimaryButton label="Salvar ficha" onPress={handleSubmit(onSubmit)} loading={isSubmitting} />
           </View>
+          {/* V3, Épico 09 — registrar o que foi produzido baixa o estoque
+              dos insumos vinculados. Só depois de salva (precisa de um id
+              real), mesmo critério de "Ver histórico de custo" acima. Link
+              asChild + Pressable direto (não PrimaryButton) — mesmo padrão
+              já usado pra navegação nesta tela. */}
+          {!isNew ? (
+            <Link href={`/recipes/${type}/${params.id}/production`} asChild>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Registrar produção"
+                className="mb-3 min-h-[44px] items-center justify-center rounded-xl border-[1.5px] border-brand dark:border-brand-dark px-6 py-3"
+              >
+                <AppText className="font-archivo-semibold text-base text-brand dark:text-brand-dark">
+                  Registrar produção
+                </AppText>
+              </Pressable>
+            </Link>
+          ) : null}
           {!isNew ? <PrimaryButton label="Arquivar ficha" variant="outline" onPress={handleArchive} /> : null}
         </>
       ) : null}
