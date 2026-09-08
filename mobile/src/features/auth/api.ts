@@ -2,6 +2,7 @@ import * as Linking from 'expo-linking';
 import { supabase } from '../../lib/supabase';
 import { normalizeCnpj } from '../../validators/cnpj';
 import type { OnboardingInput } from '../../validators/onboarding';
+import { logEvent } from '../analytics/events';
 
 /** Mensagens conhecidas do Supabase Auth / Postgres, traduzidas para o usuário. */
 const KNOWN_ERRORS: Array<[string, string]> = [
@@ -19,8 +20,11 @@ function translateError(message: string): string {
 }
 
 export async function signIn(email: string, password: string): Promise<void> {
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) throw new Error(translateError(error.message));
+  // Best-effort, depois do login em si já ter sucedido — nunca atrasa
+  // nem arrisca o fluxo de entrada (ver src/features/analytics/events.ts).
+  void logEvent('login', { userId: data.user?.id });
 }
 
 export async function signOut(): Promise<void> {
@@ -35,6 +39,9 @@ export async function signUp(email: string, password: string): Promise<{ needsEm
     options: { emailRedirectTo: Linking.createURL('login') },
   });
   if (error) throw new Error(translateError(error.message));
+  // Conta criada com sucesso já é o evento — independe de precisar
+  // confirmar o email antes de poder logar de fato.
+  if (data.user) void logEvent('signup_completed', { userId: data.user.id });
   return { needsEmailConfirmation: !data.session };
 }
 
@@ -86,7 +93,7 @@ export async function completeOnboarding(
   });
   if (profileError) throw new Error(translateError(profileError.message));
 
-  const { error: companyError } = await supabase.rpc('create_company_with_owner', {
+  const { data: company, error: companyError } = await supabase.rpc('create_company_with_owner', {
     p_cnpj: normalizeCnpj(input.cnpj),
     p_legal_name: input.legalName,
     p_trade_name: input.tradeName || null,
@@ -96,4 +103,5 @@ export async function completeOnboarding(
     p_state: input.state,
   });
   if (companyError) throw new Error(translateError(companyError.message));
+  if (company) void logEvent('company_created', { companyId: company.id, userId, metadata: { segment: input.segment } });
 }
