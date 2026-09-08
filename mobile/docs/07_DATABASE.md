@@ -204,6 +204,8 @@ data: "30 de agosto de 2026"
 
 ## 4. Fase 3 — compras, produção e auditoria (planejado)
 
+> **Nota de implementação real (Sprint 6, Épico 09 — Produção):** assim como a Fase 2 estendeu `ingredients` em vez de nascer `inventory_items`, a tabela `productions` abaixo referencia `ingredients` (não `inventory_items`, que nunca chegou a existir) via `inventory_movements.item_id`. Escopo desta rodada: só o caminho `product_id` (produzir uma ficha técnica vendável, `products`) — `production_recipe_id` **não foi criado ainda**; a tabela `production_recipes`/`production_recipe_ingredients` (sub-receitas internas, ex. "Xarope de gengibre") continua só planejada, sem migration aplicada, ver `11_BACKLOG.md` §2b. A baixa de estoque roda dentro da função `register_production` (SECURITY DEFINER, mesmo padrão de `register_inventory_movement`): para cada `product_ingredients` com `ingredient_id` preenchido, desconta `quantity × quantidade_produzida` de `ingredients.current_quantity` (nunca deixa saldo negativo, mesma trava da Fase 2) e grava uma linha em `inventory_movements` com `type = 'producao'` e `reference_id` apontando pra `productions.id`. `purchase_lists`/`purchase_items` e `audit_logs`/`price_history` seguem só planejados, sem migration.
+
 ### `purchase_lists`
 
 | Campo | Tipo | PK/FK | Nullable | Descrição |

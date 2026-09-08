@@ -15,6 +15,7 @@ data: "30 de agosto de 2026"
 4. [V2 — Estoque (Épico 06)](#4-v2--estoque-épico-06)
 5. [V2 — CMV e Precificação (Épico 07)](#5-v2--cmv-e-precificação-épico-07)
 6. [V2 — Equipe e Permissões (Épico 08)](#6-v2--equipe-e-permissões-épico-08)
+7. [V3 — Produção (Épico 09)](#7-v3--produção-épico-09)
 
 Formato **BDD** (Given / When / Then, em português: Dado / Quando / Então). Todo cenário aqui deve ter um teste automatizado correspondente antes de a história ser considerada concluída (ver critérios de qualidade em `mobile/docs/DOCUMENTACAO-BOOKING-CHEF.md`, capítulo 10).
 
@@ -248,4 +249,50 @@ Então essa pessoa não consegue mais entrar no app com aquela conta vinculada a
 Dado que estou removendo o acesso de um funcionário
 Quando confirmo a ação
 Então o sistema exige uma confirmação explícita antes de efetivar, da mesma forma que a exclusão de conta na V1
+```
+
+## 7. V3 — Produção (Épico 09)
+
+### Registro de produção com baixa automática de estoque (09.1)
+
+```
+Dado que uma ficha técnica tem insumos vinculados ao estoque (não em texto livre)
+Quando registro que produzi N porções dessa ficha
+Então cada insumo vinculado tem seu saldo reduzido em (quantidade da receita × N), e um registro de produção é gravado com a quantidade, quem registrou e quando
+
+Dado que uma ficha técnica tem um insumo em texto livre (sem vínculo de estoque) na lista de ingredientes
+Quando registro uma produção dessa ficha
+Então esse insumo é ignorado no cálculo de baixa — não bloqueia nem gera erro, só não tem estoque pra abater
+
+Dado que registrar a produção deixaria o saldo de algum insumo vinculado abaixo de zero
+Quando confirmo o registro
+Então a operação é recusada e nenhum saldo é alterado — mesma regra de saldo nunca negativo já aplicada às movimentações de estoque (Épico 06)
+
+Dado que não tenho permissão de escrita sobre o tipo dessa ficha (ex.: sou cozinheiro tentando produzir uma ficha de Bar)
+Quando tento registrar a produção
+Então a operação é bloqueada tanto pela interface quanto pela RLS no banco — nunca só pela interface
+```
+
+### Histórico de produção (09.2)
+
+```
+Dado que uma ficha técnica já teve produções registradas
+Quando abro o histórico de produção dela
+Então vejo uma lista cronológica com a quantidade produzida, quem registrou e quando, sem nenhum registro editável ou removível
+
+Dado que sou proprietário ou gerente
+Quando consulto o histórico de produção de qualquer ficha da empresa
+Então consigo ver todos os registros, independente de quem os criou
+```
+
+### Prévia de consumo e alerta de saldo insuficiente (09.3)
+
+```
+Dado que estou preenchendo a quantidade a produzir
+Quando digito ou altero esse valor
+Então vejo, em tempo real, quanto de cada insumo vinculado será consumido, calculado a partir da receita — sem precisar confirmar antes
+
+Dado que a quantidade informada consumiria mais do que o saldo atual de algum insumo
+Quando essa prévia é calculada
+Então esse insumo é destacado visualmente antes de eu tentar confirmar, para eu poder ajustar a quantidade ou lançar uma entrada de estoque primeiro
 ```
